@@ -54,7 +54,6 @@ public class QuadrantNavigation extends View {
         distancePanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         distancePanel.add(new JLabel("Distance:"), BorderLayout.WEST);
         distancePanel.add(distance, BorderLayout.CENTER);
-        add(distancePanel);
 
         // 方向按钮：3×3 格布局（中心占位）
         JPanel grid = new JPanel(new GridLayout(3, 3, 6, 6));
@@ -86,12 +85,16 @@ public class QuadrantNavigation extends View {
         grid.add(buildButton(7, move)); // ↓
         grid.add(buildButton(8, move)); // ↘
 
-        add(grid);
+        JPanel content = new JPanel();
+        content.setOpaque(false);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.add(distancePanel);
+        content.add(grid);
+
+        add(content, BorderLayout.CENTER);
 
         revalidate();
         repaint();
-
-        add(new javax.swing.JLabel("Quadrant Navigation"), java.awt.BorderLayout.CENTER);
 
     }
 
