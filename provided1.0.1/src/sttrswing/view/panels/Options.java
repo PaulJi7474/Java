@@ -116,7 +116,10 @@ public class Options extends View {
      * @return the configured JButton
      */
     public JButton shieldsButton(final GameModel game, final GameController controller) {
-        return null;
+        ActionListener action = e -> controller.setShieldsView(game);
+        JButton btn = buildButton("Shields", action);
+        return btn;
+    
     }
 
     /**
