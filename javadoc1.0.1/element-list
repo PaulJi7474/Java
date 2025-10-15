@@ -1,0 +1,9 @@
+sttrswing
+sttrswing.controller
+sttrswing.model
+sttrswing.model.enums
+sttrswing.model.interfaces
+sttrswing.model.validator
+sttrswing.view
+sttrswing.view.guicomponents
+sttrswing.view.panels
