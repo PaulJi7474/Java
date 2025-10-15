@@ -39,21 +39,10 @@ public class QuadrantNavigation extends View {
         // 标题
         addLabel(new JLabel("Navigate Between Quadrants"));
 
-        // 距离（供测试的 Slider 对象）—— 规范只要求 getSlider() 返回它
-        this.slider = new Slider();
 
-        // 实际可视滑块（用于交互），不暴露为 public API
-        final int max = Math.max(1, game.spareEnergy()); // 简单用剩余能量当作最大可移动距离上限的代理
-        final JSlider distance = new JSlider(1, max, Math.min(3, max));
-        distance.setOpaque(false);
-        distance.setPaintTicks(true);
-        distance.setMajorTickSpacing(Math.max(1, max / 4 == 0 ? 1 : max / 4));
+        this.slider = new Slider(1, 1);
 
-        JPanel distancePanel = new JPanel(new BorderLayout(8, 8));
-        distancePanel.setOpaque(false);
-        distancePanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        distancePanel.add(new JLabel("Distance:"), BorderLayout.WEST);
-        distancePanel.add(distance, BorderLayout.CENTER);
+        final double defaultDistance = 1.0;
 
         // 方向按钮：3×3 格布局（中心占位）
         JPanel grid = new JPanel(new GridLayout(3, 3, 6, 6));
@@ -65,7 +54,7 @@ public class QuadrantNavigation extends View {
             if (e.getSource() instanceof DirectionButton) {
                 DirectionButton btn = (DirectionButton) e.getSource();
                 int direction = btn.getDirection();
-                double dist = Math.max(1, distance.getValue()); // 简单映射为 double
+                double dist = defaultDistance;
                 game.moveBetweenQuadrants(direction, dist);
                 game.turn();
                 controller.setDefaultView(game);
@@ -88,7 +77,6 @@ public class QuadrantNavigation extends View {
         JPanel content = new JPanel();
         content.setOpaque(false);
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.add(distancePanel);
         content.add(grid);
 
         add(content, BorderLayout.CENTER);
