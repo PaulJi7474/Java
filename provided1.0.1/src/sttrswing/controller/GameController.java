@@ -8,12 +8,13 @@ import sttrswing.view.WinGameView;
 import sttrswing.view.LoseGameView;
 import sttrswing.view.panels.EnterpriseStatus;
 import sttrswing.view.panels.Options;
-import sttrswing.view.panels.PhaserAttack;
-import sttrswing.view.panels.QuadrantNavigation;
 import sttrswing.view.panels.QuadrantScan;
-import sttrswing.view.panels.Shield;
-import sttrswing.view.panels.Torpedo;
+import sttrswing.view.panels.NearbyQuadrantScan;
 import sttrswing.view.panels.WarpNavigation;
+import sttrswing.view.panels.QuadrantNavigation;
+// import sttrswing.view.panels.PhaserAttack;
+// import sttrswing.view.panels.Shield;
+// import sttrswing.view.panels.Torpedo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,39 +44,55 @@ public class GameController extends JFrame {
    * 首次调用：展示 StartView。
    * 之后（例如从 Start 按钮回调再调用）：可根据需要切到默认视图。
    */
+/**
+ * 首次显示界面：图1布局（TL=Start, TR=Stats, BL=Map, BR=Buttons）。
+ * 点击 Start 后由 StartView 回调到 setCurrentQuadrantScanView(game) 切到图2布局。
+ */
+/**
+ * 首次显示界面：图1布局（TL=Start, TR=Stats, BL=Map, BR=Buttons）。
+ * 点击 Start 后由 StartView 回调到 setCurrentQuadrantScanView(game) 切到图2布局。
+ */
   public void start(GameModel game) {
-    // 基础窗口初始化（只做一次）
+    // 初次启动时，设置窗口基本属性和菜单
     if (!isDisplayable()) {
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setSize(windowSize);
       setLocationRelativeTo(null);
       setTitle("Star Trek");
+
       JMenuBar mb = new JMenuBar();
       fileMenu.removeAll();
       JMenuItem save = new JMenuItem("Save");
-      save.addActionListener(e -> JOptionPane.showMessageDialog(this, "Save not implemented yet."));
+      save.addActionListener(e ->
+          javax.swing.JOptionPane.showMessageDialog(this, "Save not implemented yet."));
       JMenuItem load = new JMenuItem("Load");
-      load.addActionListener(
-          e -> {
-            JOptionPane.showMessageDialog(this, "Load not implemented yet.");
-            setDefaultView(game);
-          });
+      load.addActionListener(e ->
+          javax.swing.JOptionPane.showMessageDialog(this, "Load not implemented yet."));
       fileMenu.add(save);
       fileMenu.add(load);
       mb.add(fileMenu);
       setJMenuBar(mb);
     }
 
-    // 规范要求：Creates a StartView and sets for the GameControllers current view.
+    // —— 图1：预开始布局 —— //
     StartView startView = new StartView(game, this);
-    currentView = startView;
-    setContentPane(startView);
+    StandardLayoutView layout = new StandardLayoutView("Star Trek");
+    layout.addViewPanel(startView);                   // 左上：Start
+    layout.addViewPanel(new EnterpriseStatus(game));  // 右上：Stat / Value
+    layout.addViewPanel(new QuadrantScan(game));      // 左下：Map
+    layout.addViewPanel(new Options(game, this));     // 右下：按钮
+
+    // 显示
+    currentView = layout;
+    setContentPane(layout);
     revalidate();
     repaint();
     if (!isVisible()) {
       setVisible(true);
     }
   }
+
+
 
   public void setWinGameView(GameModel game) {
     WinGameView view = new WinGameView(game, this);
@@ -100,18 +117,31 @@ public class GameController extends JFrame {
   }
 
   public void setQuadrantNavigationView(GameModel game) {
+    if (game.hasWon()) { setWinGameView(game); return; }
+    if (game.hasLost()) { setLoseGameView(game); return; }
+
     StandardLayoutView layout = new StandardLayoutView("Quadrant Navigation");
+    layout.addViewPanel(new QuadrantScan(game))              // TL
+          .addViewPanel(new EnterpriseStatus(game))          // TR
+          .addViewPanel(new Options(game, this))             // BL
+          .addViewPanel(new QuadrantNavigation(game, this)); // BR
+
     currentView = layout;
     setContentPane(layout);
     revalidate();
     repaint();
-    if (!isVisible()) {
-      setVisible(true);
-    }
+    if (!isVisible()) setVisible(true);
   }
+
 
   public void setCurrentQuadrantScanView(GameModel game) {
-    StandardLayoutView layout = new StandardLayoutView("Current Quadrant Scan");
+    // —— 图2：进行中的布局 —— //
+    StandardLayoutView layout = new StandardLayoutView("Star Trek |");
+    layout.addViewPanel(new QuadrantScan(game));      // 左上：Map
+    layout.addViewPanel(new EnterpriseStatus(game));  // 右上：Stat / Value
+    layout.addViewPanel(new Options(game, this));     // 左下：按钮
+    // 右下：留空，不再添加第 4 个面板
+
     currentView = layout;
     setContentPane(layout);
     revalidate();
@@ -120,27 +150,45 @@ public class GameController extends JFrame {
       setVisible(true);
     }
   }
+
 
   public void setScanNearbyQuadrantView(GameModel game) {
-    StandardLayoutView layout = new StandardLayoutView("Nearby Quadrants Scan");
-    currentView = layout;
-    setContentPane(layout);
-    revalidate();
-    repaint();
-    if (!isVisible()) {
-      setVisible(true);
-    }
+      StandardLayoutView layout = new StandardLayoutView("Long Range Scan");
+      // 左上：当前象限地图（短扫）
+      layout.addViewPanel(new QuadrantScan(game));
+      // 右上：Stat/Value
+      layout.addViewPanel(new EnterpriseStatus(game));
+      // 左下：操作按钮
+      layout.addViewPanel(new Options(game, this));
+      // 右下：长程扫描 3×3 结果
+      layout.addViewPanel(new NearbyQuadrantScan(game));
+
+      currentView = layout;
+      setContentPane(layout);
+      revalidate();
+      repaint();
+      if (!isVisible()) setVisible(true);
+      pack(); // 让布局计算尺寸，避免空白
   }
 
+
   public void setWarpNavigationView(GameModel game) {
+    // route to end screens if needed
+    if (game.hasWon()) { setWinGameView(game); return; }
+    if (game.hasLost()) { setLoseGameView(game); return; }
+
+    // 2x2 layout: TL map, TR stats, BL options, BR warp controls
     StandardLayoutView layout = new StandardLayoutView("Warp Navigation");
+    layout.addViewPanel(new QuadrantScan(game))          // TL: map (current quadrant)
+          .addViewPanel(new EnterpriseStatus(game))      // TR: stats & values
+          .addViewPanel(new Options(game, this))         // BL: options
+          .addViewPanel(new WarpNavigation(game, this)); // BR: warp controls
+
     currentView = layout;
     setContentPane(layout);
     revalidate();
     repaint();
-    if (!isVisible()) {
-      setVisible(true);
-    }
+    if (!isVisible()) setVisible(true);
   }
 
   public void setPhaserAttackView(GameModel game) {

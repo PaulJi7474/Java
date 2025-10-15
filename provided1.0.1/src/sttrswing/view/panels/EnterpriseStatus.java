@@ -77,6 +77,11 @@ public class EnterpriseStatus extends View {
 
         revalidate();
         repaint();
+
+        if (getComponentCount() == 0) {
+            add(new javax.swing.JLabel("Enterprise Status"), java.awt.BorderLayout.CENTER);
+        }
+
     }
 
     /**

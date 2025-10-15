@@ -84,6 +84,11 @@ public class WarpNavigation extends View {
 
         revalidate();
         repaint();
+        
+        if (getComponentCount() == 0) {
+            add(new javax.swing.JButton("Warp…"), java.awt.BorderLayout.CENTER);
+        }
+
     }
 
     /**

@@ -451,6 +451,14 @@ public class Game implements GameModel {
       jumps -= 1;
       iterations += 1;
       nextSectorIsValid = attemptMoveInQuadrant(this.currentQuadrant, this.getEnterprise(), vector);
+      if (nextSectorIsValid) {
+      // 成功移动 1 个 sector
+        if (this.hasSpareEnergy(1)) {
+          this.getEnterprise().drainEnergy(1); // 每步 1 能量
+        } else {
+          break; // 没能量了，停止进一步移动
+        }
+      }
     }
 
     this.report =
@@ -527,6 +535,13 @@ public class Game implements GameModel {
       jumps -= 1;
       iterations += 1;
       nextQuadrantIsValid = attemptMoveBetweenQuadrants(vector);
+      if (nextQuadrantIsValid) {
+        if (this.hasSpareEnergy(1)) {
+          this.getEnterprise().drainEnergy(1); // 每跳 1 能量
+        } else {
+          break;
+        }
+      }
     }
     if (iterations == maxIterations) {
       throw new RuntimeException("Hit maximum iterations for Game.moveBetweenQuadrants()!");

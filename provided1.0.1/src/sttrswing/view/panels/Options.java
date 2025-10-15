@@ -1,183 +1,112 @@
+// src/sttrswing/view/panels/Options.java
 package sttrswing.view.panels;
 
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.View;
-import sttrswing.view.Pallete;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
-import java.util.Objects;
+import javax.swing.JButton;
 
 /**
- * Options view: presents game action buttons.
- * Public API (per spec):
- *  - public Options(GameModel game, GameController controller)
- *  - public void buildOptionButtons(GameModel game, GameController controller)
- *  - public JButton scanInQuadrantButton(GameModel game, GameController controller)
- *  - public JButton scanNearbyQuadrantsButton(GameModel game, GameController controller)
- *  - public JButton shieldsButton(GameModel game, GameController controller)
- *  - public JButton torpedoButton(GameModel game, GameController controller)
- *  - public JButton phasersButton(GameModel game, GameController controller)
+ * Options panel: right-下象限的一列操作按钮。
+ * 本实现新增 Short/Long Range Scan，并去掉旧的 "Scan: Quadrant"。
  */
 public class Options extends View {
 
-    private final JPanel buttonColumn;
+  public Options(GameModel game, GameController controller) {
+    super("Options");
+    // 垂直 7 行按钮，留一点行间距更接近示例图
+    this.setLayout(new GridLayout(7, 1, 0, 8));
+    buildOptionButtons(game, controller);
+  }
 
-    /**
-     * Constructs an Options view.
-     * @param game        game state we use to construct this view
-     * @param controller  controller state for navigation / actions
-     */
-    public Options(final GameModel game, final GameController controller) {
-        super("Options");
-        Objects.requireNonNull(game, "game must not be null");
-        Objects.requireNonNull(controller, "controller must not be null");
+  /** 构建所有操作按钮并加入面板。 */
+  public void buildOptionButtons(GameModel game, GameController controller) {
+    // 1) Quadrant Navigation
+    this.add(buildButton("Quadrant Navigation", e -> {
+      controller.setQuadrantNavigationView(game);
+    }));
 
-        setLayout(new BorderLayout(8, 8));
+    // 2) Warp Navigation
+    this.add(buildButton("Warp Navigation", e -> {
+      controller.setWarpNavigationView(game);
+    }));
 
-        buttonColumn = new JPanel(new GridLayout(0, 1, 8, 8));
-        buttonColumn.setOpaque(false);
-        buttonColumn.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        add(buttonColumn, BorderLayout.CENTER);
+    // 3) Phasers
+    this.add(phasersButton(game, controller));
 
-        buildOptionButtons(game, controller);
+    // 4) Torpedoes
+    this.add(torpedoButton(game, controller));
 
-        revalidate();
-        repaint();
+    // 5) Shields
+    this.add(shieldsButton(game, controller));
+
+    // 6) Short Range Scan —— 当前象限（8×8 sector）
+    this.add(scanInQuadrantButton(game, controller));
+
+    // 7) Long Range Scan —— 附近 3×3 象限统计
+    this.add(scanNearbyQuadrantsButton(game, controller));
+  }
+
+  /** Phasers 按钮：若能量不足则禁用（Javadoc 要求）。 */
+  public JButton phasersButton(GameModel game, GameController controller) {
+    ActionListener listener = e -> controller.setPhaserAttackView(game);
+    JButton btn = buildButton("Phasers", listener);
+    // 无参 hasSpareEnergy()：是否有足够能量做需要能量的动作
+    try {
+      btn.setEnabled(game.hasSpareEnergy());
+    } catch (Throwable ignore) {
+      // 某些实现只提供 hasSpareEnergy(int)；那就保持可点，由界面内再校验
     }
+    return btn;
+  }
 
-    /**
-     * Constructs the various game options as JButton to be presented on this Options.
-     * @param game        game state for button actions
-     * @param controller  controller for screen transitions
-     */
-    public void buildOptionButtons(final GameModel game, final GameController controller) {
-        buttonColumn.removeAll();
-
-        JButton quadrantNav = buildButton("Quadrant Navigation", e -> controller.setQuadrantNavigationView(game));
-        JButton warpNav = buildButton("Warp Navigation", e -> controller.setWarpNavigationView(game));
-        JButton phasers = phasersButton(game, controller);
-        JButton torpedo = torpedoButton(game, controller);
-        JButton shields = shieldsButton(game, controller);
-        JButton shortRange = scanInQuadrantButton(game, controller);
-        JButton longRange = scanNearbyQuadrantsButton(game, controller);
-
-        JButton[] buttons = new JButton[]{
-            quadrantNav, warpNav, phasers, torpedo, shields, shortRange, longRange
-        };
-        for (JButton button : buttons) {
-            button.setFocusPainted(false);
-            button.setBackground(Pallete.BLUEDARK.color());
-            button.setForeground(Pallete.WHITE.color());
-            button.setFont(button.getFont().deriveFont(Font.BOLD, 14f));
-            button.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Pallete.GREY.color()),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
-            button.setPreferredSize(new Dimension(220, 44));
-        }
-
-        buttonColumn.add(quadrantNav);
-        buttonColumn.add(warpNav);
-        buttonColumn.add(phasers);
-        buttonColumn.add(torpedo);
-        buttonColumn.add(shields);
-        buttonColumn.add(shortRange);
-        buttonColumn.add(longRange);
+  /** Torpedoes 按钮：若弹药为 0 则禁用（Javadoc 语义）。 */
+  public JButton torpedoButton(GameModel game, GameController controller) {
+    ActionListener listener = e -> controller.setTorpedoView(game);
+    JButton btn = buildButton("10 x Torpedoes", listener);
+    try {
+      // GameModel / Game 都有 hasSpareTorpedoes()
+      btn.setEnabled(game.hasSpareTorpedoes());
+    } catch (Throwable ignore) {
+      // 若接口实现不同，保持可用
     }
+    return btn;
+  }
 
-    /**
-     * Creates a JButton configured to enable scanning the current quadrant,
-     * triggering a game turn and then transitioning to the current quadrant scan view.
-     * @param game        reference to the game state for use in the action listener.
-     * @param controller  reference to the controller for screen transition.
-     * @return the configured JButton
-     */
-    public JButton scanInQuadrantButton(final GameModel game, final GameController controller) {
-        ActionListener action = e -> {
-            game.scanQuadrant();
-            game.turn();
-            controller.setCurrentQuadrantScanView(game);
-        };
-        JButton btn = buildButton("Short Range Scan", action);
-        return btn;
-    }
+  /** Shields 按钮：进入护盾设置界面。 */
+  public JButton shieldsButton(GameModel game, GameController controller) {
+    return buildButton("Shields", e -> controller.setShieldsView(game));
+  }
 
-    /**
-     * Creates a JButton configured to enable scanning nearby quadrants,
-     * triggering a game turn and then transitioning to the sector scan view.
-     * @param game        reference to the game state for use in the action listener.
-     * @param controller  reference to the controller for screen transition.
-     * @return the configured JButton
-     */
-    public JButton scanNearbyQuadrantsButton(final GameModel game, final GameController controller) {
-        ActionListener action = e -> {
-            // “扫描附近象限”的数据来自 getSurroundingQuadrants()；这里只需推动时间并切换界面
-            /** 
-             * The data for "scan nearby quadrants" comes from getSurroundingQuadrants();
-             * here we just need to advance time and switch the view.
-            */
-            game.turn();
-            controller.setScanNearbyQuadrantView(game);
-        };
-        JButton btn = buildButton("Scan: Nearby Quadrants", action);
-        return btn;
-    }
+  /**
+   * Short Range Scan（短程扫描）：
+   * 1) 扫描当前象限 game.scanQuadrant();
+   * 2) 结算回合 game.turn();
+   * 3) 切到当前象限扫描视图 controller.setCurrentQuadrantScanView(game);
+   */
+  public JButton scanInQuadrantButton(GameModel game, GameController controller) {
+    return buildButton("Short Range Scan", e -> {
+      game.scanQuadrant();     // 记录报告、标记已扫描
+      game.turn();             // 扫描算一回合
+      controller.setCurrentQuadrantScanView(game);
+    });
+  }
 
-    /**
-     * Creates a JButton configured to enable setting the GameController to the shields view.
-     * @param game        game state
-     * @param controller  game controller used for manipulating the user view
-     * @return the configured JButton
-     */
-    public JButton shieldsButton(final GameModel game, final GameController controller) {
-        ActionListener action = e -> {
-            game.turn();
-            controller.setScanNearbyQuadrantView(game);
-        };
-        JButton btn = buildButton("Long Range Scan", action);
-        return btn;
-    }
-
-    /**
-     * Constructs a JButton that has an ActionListener bound to request the controller
-     * to go to the torpedo view.
-     * @param game        game state
-     * @param controller  controller state
-     * @return the configured JButton
-     */
-    public JButton torpedoButton(final GameModel game, final GameController controller) {
-        ActionListener action = e -> controller.setTorpedoView(game);
-        JButton btn = buildButton("10 x Torpedoes", action);
-        try {
-            if (!game.hasSpareTorpedoes()) {
-                btn.setEnabled(false);
-                btn.setToolTipText("No torpedoes remaining.");
-            }
-        } catch (Throwable ignored) {
-        }
-        return btn;
-    }
-
-    /**
-     * Creates a JButton with an action bound that will tell the controller to go to the phaser
-     * attack screen. Tracks the JButton and ActionListener for cleanup. Will set the button to
-     * disabled if there is not sufficient energy for phasers to be an option.
-     * @param game        Game state for use in any relevant actions
-     * @param controller  Reference to the Controller, so we can alter screens
-     * @return the configured JButton
-     */
-    public JButton phasersButton(final GameModel game, final GameController controller) {
-        ActionListener action = e -> controller.setPhaserAttackView(game);
-        JButton btn = buildButton("Phasers", action);
-        try {
-            if (!game.hasSpareEnergy()) {
-                btn.setEnabled(false);
-                btn.setToolTipText("Not enough energy to fire phasers.");
-            }
-        } catch (Throwable ignored) {
-        }
-        return btn;
-    }
+  /**
+   * Long Range Scan（长程扫描）：
+   * 1) 直接结算回合（长扫也消耗回合）
+   * 2) 切到周边象限扫描视图 controller.setScanNearbyQuadrantView(game);
+   *
+   * 说明：长扫显示 3×3 邻近象限的 Klingons/Starbases/Stars 统计，
+   * 数据来源于 Galaxy/Quadrant；不需要调用 game.scanQuadrant()。
+   */
+  public JButton scanNearbyQuadrantsButton(GameModel game, GameController controller) {
+    return buildButton("Long Range Scan", e -> {
+      game.turn();
+      controller.setScanNearbyQuadrantView(game);
+    });
+  }
 }

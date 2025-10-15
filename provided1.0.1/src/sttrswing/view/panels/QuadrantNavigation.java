@@ -31,11 +31,9 @@ public class QuadrantNavigation extends View {
      * @param game        game state we use to construct this view
      * @param controller  controller state we use for navigation/actions
      */
-    public QuadrantNavigation(final GameModel game, final GameController controller) {
+    public QuadrantNavigation(GameModel game, GameController controller) {
         super("Quadrant Navigation");
-        // this.game = Objects.requireNonNull(game, "game must not be null");
         Objects.requireNonNull(game, "game must not be null");
-        // this.controller = Objects.requireNonNull(controller, "controller must not be null");
         Objects.requireNonNull(controller, "controller must not be null");
 
         // 标题
@@ -92,6 +90,9 @@ public class QuadrantNavigation extends View {
 
         revalidate();
         repaint();
+
+        add(new javax.swing.JLabel("Quadrant Navigation"), java.awt.BorderLayout.CENTER);
+
     }
 
     /**

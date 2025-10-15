@@ -70,6 +70,10 @@ public class NearbyQuadrantScan extends View {
 
         revalidate();
         repaint();
+        if (getComponentCount() == 0) {
+            add(new javax.swing.JLabel("Scanning…"), java.awt.BorderLayout.CENTER);
+        }
+
     }
 
     /**

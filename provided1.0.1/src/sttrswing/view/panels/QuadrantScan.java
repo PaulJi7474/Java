@@ -26,7 +26,7 @@ public class QuadrantScan extends View {
      * Construct a new QuadrantScan.
      * @param game game state we need access to for the symbol for the current Quadrant.
      */
-    public QuadrantScan(final GameModel game) {
+    public QuadrantScan(GameModel game) {
         super("Quadrant Scan");
         this.game = Objects.requireNonNull(game, "game must not be null");
 
