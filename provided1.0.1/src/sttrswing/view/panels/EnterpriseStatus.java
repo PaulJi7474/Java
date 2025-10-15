@@ -30,7 +30,6 @@ public class EnterpriseStatus extends View {
         this.game = Objects.requireNonNull(game, "game must not be null");
 
         setLayout(new BorderLayout(8, 8));
-        addLabel(new JLabel("Enterprise Status"));
 
         DefaultTableModel model = new DefaultTableModel(new Object[]{"Stat", "Value"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }

@@ -7,7 +7,6 @@ import sttrswing.view.View;
 import sttrswing.view.WinGameView;
 import sttrswing.view.LoseGameView;
 import sttrswing.view.panels.EnterpriseStatus;
-import sttrswing.view.panels.NearbyQuadrantScan;
 import sttrswing.view.panels.Options;
 import sttrswing.view.panels.PhaserAttack;
 import sttrswing.view.panels.QuadrantNavigation;
@@ -185,7 +184,6 @@ public class GameController extends JFrame {
         new StandardLayoutView("WELCOME CAPTAIN   Click the Start button to start the game!");
     layout.addViewPanel(new QuadrantScan(game))
         .addViewPanel(new EnterpriseStatus(game))
-        .addViewPanel(new NearbyQuadrantScan(game))
         .addViewPanel(new Options(game, this));
     currentView = layout;
     setContentPane(layout);

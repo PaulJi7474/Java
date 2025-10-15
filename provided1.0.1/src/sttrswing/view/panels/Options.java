@@ -36,7 +36,6 @@ public class Options extends View {
         Objects.requireNonNull(controller, "controller must not be null");
 
         setLayout(new BorderLayout(8, 8));
-        addLabel(new JLabel("Command Options"));
 
         buttonColumn = new JPanel(new GridLayout(0, 1, 8, 8));
         buttonColumn.setOpaque(false);

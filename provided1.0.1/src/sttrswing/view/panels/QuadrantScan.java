@@ -33,8 +33,6 @@ public class QuadrantScan extends View {
         setLayout(new BorderLayout(8, 8));
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        addLabel(new JLabel("Short Range Scan"));
-
         JPanel grid = new JPanel(new GridLayout(8, 8, 2, 2));
         grid.setOpaque(false);
 

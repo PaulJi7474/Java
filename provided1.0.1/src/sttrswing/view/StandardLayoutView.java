@@ -6,25 +6,18 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class StandardLayoutView extends View {
-  private final JPanel grid;
+  private final JPanel sideColumn;
   private final ArrayList<View> viewPanels = new ArrayList<>(4);
 
   public StandardLayoutView(String title) {
     super(title);
-    setLayout(new BorderLayout(8, 8));
+    setLayout(new BorderLayout(16, 16));
     setBackground(Pallete.BLACK.color());
+    setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
-    JLabel header = new JLabel("<html><body style='width:100%'>" + getTitle() + "</body></html>",
-        SwingConstants.LEFT);
-    header.setForeground(Pallete.WHITE.color());
-    header.setFont(header.getFont().deriveFont(Font.BOLD, 16f));
-    header.setBorder(BorderFactory.createEmptyBorder(12, 12, 0, 12));
-    add(header, BorderLayout.NORTH);
-
-    grid = new JPanel(new GridLayout(2, 2, 12, 12));
-    grid.setOpaque(false);
-    grid.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-    add(grid, BorderLayout.CENTER);
+    sideColumn = new JPanel();
+    sideColumn.setLayout(new BoxLayout(sideColumn, BoxLayout.Y_AXIS));
+    sideColumn.setOpaque(false);
   }
 
   /** Adds a View up to a maximum of 4; returns this for chaining. */
@@ -32,13 +25,29 @@ public class StandardLayoutView extends View {
     if (viewPanels.size() >= 4) {
       throw new RuntimeException("StandardLayoutView can hold at most 4 panels.");
     }
-    view.setOpaque(true);
-    view.setBackground(Pallete.BLACK.color());
-    view.setBorder(BorderFactory.createCompoundBorder(
-        BorderFactory.createLineBorder(Pallete.GREYDARK.color()),
-        BorderFactory.createEmptyBorder(12, 12, 12, 12)));
+
+    if (viewPanels.isEmpty()) {
+      view.setOpaque(true);
+      view.setBackground(Pallete.BLACK.color());
+    } else {
+      view.setOpaque(false);
+    }
+    view.setBorder(BorderFactory.createEmptyBorder());
     viewPanels.add(view);
-    grid.add(view);
+
+    if (viewPanels.size() == 1) {
+      add(view, BorderLayout.CENTER);
+    } else {
+      if (sideColumn.getParent() == null) {
+        add(sideColumn, BorderLayout.EAST);
+      }
+      if (sideColumn.getComponentCount() > 0) {
+        sideColumn.add(Box.createVerticalStrut(16));
+      }
+      view.setAlignmentX(Component.LEFT_ALIGNMENT);
+      sideColumn.add(view);
+    }
+
     revalidate();
     repaint();
     return this;
@@ -47,5 +56,5 @@ public class StandardLayoutView extends View {
   /** For testability: returns a copy of the added views list. */
   public ArrayList<View> getViewPanels() {
     return new ArrayList<>(viewPanels);
-    }
+  }
 }
