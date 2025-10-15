@@ -1,6 +1,16 @@
 package sttrswing.view.panels;
 
+import sttrswing.model.enums.Faction;
 import sttrswing.model.interfaces.GameModel;
+import sttrswing.model.interfaces.HasFaction;
+import sttrswing.model.interfaces.HasSymbol;
+import sttrswing.view.View;
+import sttrswing.view.guicomponents.MapSquare;
+
+import sttrswing.model.enums.Faction;
+import sttrswing.model.interfaces.GameModel;
+import sttrswing.model.interfaces.HasFaction;
+import sttrswing.model.interfaces.HasSymbol;
 import sttrswing.view.View;
 import sttrswing.view.guicomponents.MapSquare;
 
@@ -27,31 +37,36 @@ public class NearbyQuadrantScan extends View {
         super("Nearby Quadrants");
         this.game = Objects.requireNonNull(game, "game must not be null");
 
-        // title
+        setLayout(new BorderLayout(8, 8));
         addLabel(new JLabel("Nearby Quadrants"));
 
-        // 3x3 grid container (semi-transparent to inherit black background)
         JPanel grid = new JPanel(new GridLayout(3, 3, 6, 6));
         grid.setOpaque(false);
         grid.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
-        // Get surrounding quadrant symbols (may be null)
         HashMap<String, String> m = game.getSurroundingQuadrants();
+        String playerSymbol = "YOU";
+        for (Object entry : game.getSymbolsForQuadrant()) {
+            HasFaction faction = (HasFaction) entry;
+            if (faction.faction() == Faction.FEDERATION) {
+                playerSymbol = ((HasSymbol) entry).symbol();
+                break;
+            }
+        }
 
-        // Fill in visual orientation order: TL, T, TR / L, C, R / BL, B, BR
         grid.add(buildMapSquare(m.get("topLeft")));
         grid.add(buildMapSquare(m.get("top")));
         grid.add(buildMapSquare(m.get("topRight")));
 
         grid.add(buildMapSquare(m.get("left")));
-        grid.add(buildMapSquare("YOU"));          // center is always "YOU"
+        grid.add(buildMapSquare(playerSymbol));
         grid.add(buildMapSquare(m.get("right")));
 
         grid.add(buildMapSquare(m.get("bottomLeft")));
         grid.add(buildMapSquare(m.get("bottom")));
         grid.add(buildMapSquare(m.get("bottomRight")));
 
-        add(grid);
+        add(grid, BorderLayout.CENTER);
 
         revalidate();
         repaint();

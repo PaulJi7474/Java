@@ -1,8 +1,9 @@
 package sttrswing.view.panels;
 
-import sttrswing.view.View;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.model.interfaces.HasPosition;
+import sttrswing.view.Pallete;
+import sttrswing.view.View;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -28,44 +29,52 @@ public class EnterpriseStatus extends View {
         super("Enterprise Status");
         this.game = Objects.requireNonNull(game, "game must not be null");
 
-        // Title
+        setLayout(new BorderLayout(8, 8));
         addLabel(new JLabel("Enterprise Status"));
 
-        // Build non-editable table model (Property / Value)
-        DefaultTableModel model = new DefaultTableModel(new Object[]{"Property", "Value"}, 0) {
+        DefaultTableModel model = new DefaultTableModel(new Object[]{"Stat", "Value"}, 0) {
             @Override public boolean isCellEditable(int row, int column) { return false; }
         };
 
-        // Populate from GameModel (only using its public interface)
-        HasPosition pos = game.playerPosition();
-        String position = (pos == null) ? "(?, ?)" : "(" + pos.getX() + ", " + pos.getY() + ")";
-        model.addRow(new Object[]{"Position", position});
+        java.util.function.Function<HasPosition, String> formatPosition = position -> {
+            if (position == null) {
+                return "?, ?";
+            }
+            int x = position.getX() + 1;
+            int y = position.getY() + 1;
+            return x + ", " + y;
+        };
+
+        model.addRow(new Object[]{"Quadrant (X,Y)", formatPosition.apply(game.galaxyPosition())});
+        model.addRow(new Object[]{"Sector (X,Y)", formatPosition.apply(game.playerPosition())});
+        model.addRow(new Object[]{"Torpedoes", game.spareTorpedoes()});
         model.addRow(new Object[]{"Energy", game.playerEnergy()});
         model.addRow(new Object[]{"Shields", game.playerShields()});
-        model.addRow(new Object[]{"Spare Energy", game.spareEnergy()});
-        model.addRow(new Object[]{"Spare Torpedoes", game.spareTorpedoes()});
-        model.addRow(new Object[]{"Klingons (Total)", game.totalKlingonCount()});
-        model.addRow(new Object[]{"Starbases (Total)", game.totalStarbaseCount()});
+        model.addRow(new Object[]{"Klingons left in Galaxy", game.totalKlingonCount()});
+        model.addRow(new Object[]{"Starbases left in Galaxy", game.totalStarbaseCount()});
 
-        // Table styling for dark background
         table = new JTable(model);
         table.setFillsViewportHeight(true);
-        table.setRowHeight(22);
-        table.setBackground(Color.BLACK);
-        table.setForeground(Color.WHITE);
-        table.setGridColor(new Color(90, 90, 90));
-        table.setSelectionBackground(new Color(30, 30, 30));
-        table.setSelectionForeground(Color.WHITE);
+        table.setRowHeight(26);
+        table.setBackground(Pallete.BLACK.color());
+        table.setForeground(Pallete.WHITE.color());
+        table.setGridColor(Pallete.GREYDARK.color());
+        table.setSelectionBackground(Pallete.GREYDARK.color());
+        table.setSelectionForeground(Pallete.WHITE.color());
         table.setShowHorizontalLines(true);
         table.setShowVerticalLines(false);
+        table.setFont(table.getFont().deriveFont(Font.PLAIN, 14f));
+        table.getTableHeader().setReorderingAllowed(false);
+        table.getTableHeader().setBackground(Pallete.BLACK.color());
+        table.getTableHeader().setForeground(Pallete.WHITE.color());
+        table.getTableHeader().setFont(table.getTableHeader().getFont().deriveFont(Font.BOLD, 14f));
 
         JScrollPane scroller = new JScrollPane(table);
         scroller.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        scroller.getViewport().setBackground(Pallete.BLACK.color());
         scroller.setOpaque(false);
-        scroller.getViewport().setOpaque(false);
-
-        // Since View uses BoxLayout.Y_AXIS, this adds the table under the title
-        add(scroller);
+        scroller.getViewport().setOpaque(true);
+        add(scroller, BorderLayout.CENTER);
 
         revalidate();
         repaint();

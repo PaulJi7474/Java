@@ -2,14 +2,17 @@ package sttrswing.view.panels;
 
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.model.interfaces.HasFaction;
+import sttrswing.model.interfaces.HasPosition;
 import sttrswing.model.interfaces.HasSymbol;
 import sttrswing.model.enums.Faction;
+import sttrswing.view.Pallete;
 import sttrswing.view.View;
 import sttrswing.view.guicomponents.MapSquare;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
+import java.util.ArrayList;
 
 /**
  * Scans and renders the current quadrant. Only exposes the constructor and the two
@@ -27,15 +30,44 @@ public class QuadrantScan extends View {
         super("Quadrant Scan");
         this.game = Objects.requireNonNull(game, "game must not be null");
 
-        // 标题
+        setLayout(new BorderLayout(8, 8));
+        setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
         addLabel(new JLabel("Short Range Scan"));
 
-        // 留一个容器摆放 MapSquare（此处只是占位，真实格子由控制器/其它面板组装）
-        JPanel container = new JPanel(new GridLayout(1, 1, 4, 4));
-        container.setOpaque(false);
-        container.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        container.add(buildEmptyMapSquare());
-        add(container);
+        JPanel grid = new JPanel(new GridLayout(8, 8, 2, 2));
+        grid.setOpaque(false);
+
+        MapSquare[][] squares = new MapSquare[8][8];
+        ArrayList<?> entries = game.getSymbolsForQuadrant();
+        for (Object entry : entries) {
+            HasPosition pos = (HasPosition) entry;
+            int x = Math.max(0, Math.min(7, pos.getX()));
+            int y = Math.max(0, Math.min(7, pos.getY()));
+            squares[y][x] = buildMapSquare((HasSymbol & HasFaction) entry);
+        }
+
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                MapSquare sq = squares[y][x];
+                if (sq == null) {
+                    sq = buildEmptyMapSquare();
+                    sq.setText(" ? ");
+                }
+                grid.add(sq);
+            }
+        }
+
+        add(grid, BorderLayout.CENTER);
+
+        JTextArea report = new JTextArea(game.lastActionReport());
+        report.setEditable(false);
+        report.setLineWrap(true);
+        report.setWrapStyleWord(true);
+        report.setForeground(Pallete.WHITE.color());
+        report.setOpaque(false);
+        report.setMargin(new Insets(8, 0, 0, 0));
+        add(report, BorderLayout.SOUTH);
 
         revalidate();
         repaint();

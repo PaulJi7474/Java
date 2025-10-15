@@ -3,6 +3,7 @@ package sttrswing.view.panels;
 import sttrswing.controller.GameController;
 import sttrswing.model.interfaces.GameModel;
 import sttrswing.view.View;
+import sttrswing.view.Pallete;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +23,8 @@ import java.util.Objects;
  */
 public class Options extends View {
 
+    private final JPanel buttonColumn;
+
     /**
      * Constructs an Options view.
      * @param game        game state we use to construct this view
@@ -32,11 +35,14 @@ public class Options extends View {
         Objects.requireNonNull(game, "game must not be null");
         Objects.requireNonNull(controller, "controller must not be null");
 
-        // title
-        addLabel(new JLabel("Game Options"));
+        setLayout(new BorderLayout(8, 8));
+        addLabel(new JLabel("Command Options"));
 
-        // content area (button area)
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        buttonColumn = new JPanel(new GridLayout(0, 1, 8, 8));
+        buttonColumn.setOpaque(false);
+        buttonColumn.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        add(buttonColumn, BorderLayout.CENTER);
+
         buildOptionButtons(game, controller);
 
         revalidate();
@@ -49,26 +55,37 @@ public class Options extends View {
      * @param controller  controller for screen transitions
      */
     public void buildOptionButtons(final GameModel game, final GameController controller) {
-        // setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
-        JButton inQuadrant = scanInQuadrantButton(game, controller);
-        JButton nearby     = scanNearbyQuadrantsButton(game, controller);
-        JButton shields    = shieldsButton(game, controller);
-        JButton torpedo    = torpedoButton(game, controller);
-        JButton phasers    = phasersButton(game, controller);
+        buttonColumn.removeAll();
 
-        // vertical layout with spacing
-        inQuadrant.setAlignmentX(Component.LEFT_ALIGNMENT);
-        nearby.setAlignmentX(Component.LEFT_ALIGNMENT);
-        shields.setAlignmentX(Component.LEFT_ALIGNMENT);
-        torpedo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        phasers.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JButton quadrantNav = buildButton("Quadrant Navigation", e -> controller.setQuadrantNavigationView(game));
+        JButton warpNav = buildButton("Warp Navigation", e -> controller.setWarpNavigationView(game));
+        JButton phasers = phasersButton(game, controller);
+        JButton torpedo = torpedoButton(game, controller);
+        JButton shields = shieldsButton(game, controller);
+        JButton shortRange = scanInQuadrantButton(game, controller);
+        JButton longRange = scanNearbyQuadrantsButton(game, controller);
 
-        add(Box.createVerticalStrut(4)); add(inQuadrant);
-        add(Box.createVerticalStrut(4)); add(nearby);
-        add(Box.createVerticalStrut(4)); add(shields);
-        add(Box.createVerticalStrut(4)); add(torpedo);
-        add(Box.createVerticalStrut(4)); add(phasers);
-        add(Box.createVerticalGlue());
+        JButton[] buttons = new JButton[]{
+            quadrantNav, warpNav, phasers, torpedo, shields, shortRange, longRange
+        };
+        for (JButton button : buttons) {
+            button.setFocusPainted(false);
+            button.setBackground(Pallete.BLUEDARK.color());
+            button.setForeground(Pallete.WHITE.color());
+            button.setFont(button.getFont().deriveFont(Font.BOLD, 14f));
+            button.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Pallete.GREY.color()),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+            button.setPreferredSize(new Dimension(220, 44));
+        }
+
+        buttonColumn.add(quadrantNav);
+        buttonColumn.add(warpNav);
+        buttonColumn.add(phasers);
+        buttonColumn.add(torpedo);
+        buttonColumn.add(shields);
+        buttonColumn.add(shortRange);
+        buttonColumn.add(longRange);
     }
 
     /**
@@ -84,7 +101,7 @@ public class Options extends View {
             game.turn();
             controller.setCurrentQuadrantScanView(game);
         };
-        JButton btn = buildButton("Scan: Current Quadrant", action);
+        JButton btn = buildButton("Short Range Scan", action);
         return btn;
     }
 
@@ -116,10 +133,12 @@ public class Options extends View {
      * @return the configured JButton
      */
     public JButton shieldsButton(final GameModel game, final GameController controller) {
-        ActionListener action = e -> controller.setShieldsView(game);
-        JButton btn = buildButton("Shields", action);
+        ActionListener action = e -> {
+            game.turn();
+            controller.setScanNearbyQuadrantView(game);
+        };
+        JButton btn = buildButton("Long Range Scan", action);
         return btn;
-    
     }
 
     /**
@@ -131,7 +150,14 @@ public class Options extends View {
      */
     public JButton torpedoButton(final GameModel game, final GameController controller) {
         ActionListener action = e -> controller.setTorpedoView(game);
-        JButton btn = buildButton("Torpedoes", action);
+        JButton btn = buildButton("10 x Torpedoes", action);
+        try {
+            if (!game.hasSpareTorpedoes()) {
+                btn.setEnabled(false);
+                btn.setToolTipText("No torpedoes remaining.");
+            }
+        } catch (Throwable ignored) {
+        }
         return btn;
     }
 
@@ -146,14 +172,12 @@ public class Options extends View {
     public JButton phasersButton(final GameModel game, final GameController controller) {
         ActionListener action = e -> controller.setPhaserAttackView(game);
         JButton btn = buildButton("Phasers", action);
-        // Disable if there is not enough energy (consistent with the spec "not enough energy to be an option")
         try {
             if (!game.hasSpareEnergy()) {
                 btn.setEnabled(false);
                 btn.setToolTipText("Not enough energy to fire phasers.");
             }
         } catch (Throwable ignored) {
-            // If the interface implementation does not support it yet, do not block the interface
         }
         return btn;
     }

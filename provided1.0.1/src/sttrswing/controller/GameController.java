@@ -6,15 +6,15 @@ import sttrswing.view.StandardLayoutView;
 import sttrswing.view.View;
 import sttrswing.view.WinGameView;
 import sttrswing.view.LoseGameView;
-// import sttrswing.view.panels.EnterpriseStatus;
-// import sttrswing.view.panels.NearbyQuadrantScan;
-// import sttrswing.view.panels.Options;
-// import sttrswing.view.panels.PhaserAttack;
-// import sttrswing.view.panels.QuadrantNavigation;
-// import sttrswing.view.panels.QuadrantScan;
-// import sttrswing.view.panels.Shield;
-// import sttrswing.view.panels.Torpedo;
-// import sttrswing.view.panels.WarpNavigation;
+import sttrswing.view.panels.EnterpriseStatus;
+import sttrswing.view.panels.NearbyQuadrantScan;
+import sttrswing.view.panels.Options;
+import sttrswing.view.panels.PhaserAttack;
+import sttrswing.view.panels.QuadrantNavigation;
+import sttrswing.view.panels.QuadrantScan;
+import sttrswing.view.panels.Shield;
+import sttrswing.view.panels.Torpedo;
+import sttrswing.view.panels.WarpNavigation;
 
 import javax.swing.*;
 import java.awt.*;
@@ -172,11 +172,21 @@ public class GameController extends JFrame {
     * 再把它们按顺序 add 进去。
    */
   public void setDefaultView(GameModel game) {
-    // TODO：若 game 已结束，改为 setWinGameView(...) 或 setLoseGameView(...)
-    StandardLayoutView layout = new StandardLayoutView("WELCOME CAPTAIN   Click the Start button to start the game!");
-    // 未来：layout.addViewPanel(new QuadrantScan(game, this))
-    //      .addViewPanel(new EnterpriseStatus(game))
-    //      .addViewPanel(new Options(game, this));
+    if (game.hasWon()) {
+      setWinGameView(game);
+      return;
+    }
+    if (game.hasLost()) {
+      setLoseGameView(game);
+      return;
+    }
+
+    StandardLayoutView layout =
+        new StandardLayoutView("WELCOME CAPTAIN   Click the Start button to start the game!");
+    layout.addViewPanel(new QuadrantScan(game))
+        .addViewPanel(new EnterpriseStatus(game))
+        .addViewPanel(new NearbyQuadrantScan(game))
+        .addViewPanel(new Options(game, this));
     currentView = layout;
     setContentPane(layout);
     revalidate();

@@ -5,6 +5,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import sttrswing.view.Pallete;
+import java.awt.Dimension;
+import java.awt.Font;
 
 public class MapSquare extends JLabel {
 
@@ -27,7 +29,10 @@ public class MapSquare extends JLabel {
     this.setHorizontalAlignment(SwingConstants.CENTER);
     this.setBackground(background);
     this.setForeground(foreground);
-    this.setBorder(BorderFactory.createLineBorder(border));
+        this.setBorder(BorderFactory.createLineBorder(border));
+    this.setOpaque(true);
+    this.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+    this.setPreferredSize(new Dimension(38, 38));
   }
 
   /**
@@ -46,6 +51,9 @@ public class MapSquare extends JLabel {
     this.setBackground(Pallete.BLACK.color());
     this.setForeground(highlightColor);
     this.setBorder(BorderFactory.createLineBorder(highlightColor));
+    this.setOpaque(true);
+    this.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+    this.setPreferredSize(new Dimension(38, 38));
   }
 
   /**
@@ -60,6 +68,9 @@ public class MapSquare extends JLabel {
     this.setBackground(Pallete.BLACK.color());
     this.setForeground(Pallete.GREENTERMINAL.color());
     this.setBorder(BorderFactory.createLineBorder(Pallete.GREENDARK.color()));
+    this.setOpaque(true);
+    this.setFont(new Font(Font.MONOSPACED, Font.BOLD, 16));
+    this.setPreferredSize(new Dimension(38, 38));
   }
 
 }
