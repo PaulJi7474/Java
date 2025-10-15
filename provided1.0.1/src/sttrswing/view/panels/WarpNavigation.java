@@ -28,11 +28,9 @@ public class WarpNavigation extends View {
      * @param game        game state
      * @param controller  controller state
      */
-    public WarpNavigation(final GameModel game, final GameController controller) {
+    public WarpNavigation(GameModel game, GameController controller) {
         super("Warp Navigation");
-        // this.game = Objects.requireNonNull(game, "game must not be null");
         Objects.requireNonNull(game, "game must not be null");
-        // this.controller = Objects.requireNonNull(controller, "controller must not be null");
         Objects.requireNonNull(controller, "controller must not be null");
 
         addLabel(new JLabel("Warp Navigation"));

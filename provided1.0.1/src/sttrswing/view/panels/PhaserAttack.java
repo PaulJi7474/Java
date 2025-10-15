@@ -26,11 +26,9 @@ public class PhaserAttack extends View {
      * @param game        game state we use to construct this view
      * @param controller  controller state for navigation / actions
      */
-    public PhaserAttack(final GameModel game, final GameController controller) {
+    public PhaserAttack(GameModel game, GameController controller) {
         super("Phaser Attack");
-        // this.game = Objects.requireNonNull(game, "game must not be null");
         Objects.requireNonNull(game, "game must not be null");
-        // this.controller = Objects.requireNonNull(controller, "controller must not be null");
         Objects.requireNonNull(controller, "controller must not be null");
 
         // title (reuse View's addLabel for consistent style)
