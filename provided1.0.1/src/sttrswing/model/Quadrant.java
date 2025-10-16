@@ -329,7 +329,11 @@ public class Quadrant implements Hittable, HasPosition {
    * @return a {@link String} representation of the {@link Quadrant}
    */
   public String symbol() {
-    return "" + this.stars.size() + this.starbases.size() + this.klingons.size();
+    final int starCount = this.starCount();
+    final int starbaseCount = this.starbaseCount();
+    final int klingonCount = this.klingonCount();
+
+    return String.format("%d%d%d", starCount, starbaseCount, klingonCount);
   }
 
   /**

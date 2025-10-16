@@ -92,7 +92,8 @@ public class GameLoader {
         int stars = counts.getOrDefault("stars", 0);
         int starbases = counts.getOrDefault("starbases", 0);
         int klingons = counts.getOrDefault("klingons", 0);
-        // Quadrant(gx, gy, starbases, klingons, stars) —— order by symbol() method
+        // Quadrant constructor expects (starbases, klingons, stars) even though symbol() is
+        // formatted as (stars, starbases, klingons).
         Quadrant q = new Quadrant(gx, gy, starbases, klingons, stars);
         quadrants.add(q);
       } catch (IOException ignored) { /* skip malformed lines */ }

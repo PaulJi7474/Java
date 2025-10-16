@@ -250,9 +250,9 @@ public class Game implements GameModel {
     this.report =
         "Scanned Quadrant(" + this.currentQuadrant.getX() + "," + this.currentQuadrant.getY()
             + ") |";
-    this.report += " " + this.currentQuadrant.klingonCount() + " Klingons";
     this.report += " " + this.currentQuadrant.starCount() + " Stars";
     this.report += " " + this.currentQuadrant.starbaseCount() + " Starbases";
+    this.report += " " + this.currentQuadrant.klingonCount() + " Klingons";
   }
 
   /**
