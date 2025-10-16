@@ -348,11 +348,34 @@ public class Quadrant implements Hittable, HasPosition {
       boolean isDocked = enterprise.docked((ArrayList<Starbase>) this.starbases);
       if (isDocked) {
         System.out.println("ship was docked with a nearby starbase and thus safe from attack!");
-      } else {
+      } else if (this.isAlignedWithEnterprise(klingon, enterprise)) {
         totalDamage += klingon.attack(enterprise);
       }
     }
     this.cleanup();
+  }
+
+  /**
+   * Returns if the given {@link Klingon} has the {@link Enterprise} lined up along one of the
+   * eight cardinal or diagonal directions.
+   *
+   * @param klingon     enemy we are checking alignment for
+   * @param enterprise  the player's ship we are targeting
+   * @return true when the klingon can attack directly along one of the eight attack directions
+   */
+  private boolean isAlignedWithEnterprise(final Klingon klingon, final Enterprise enterprise) {
+    final int deltaX = enterprise.getX() - klingon.getX();
+    final int deltaY = enterprise.getY() - klingon.getY();
+
+    if (deltaX == 0 && deltaY == 0) {
+      return true;
+    }
+
+    if (deltaX == 0 || deltaY == 0) {
+      return true;
+    }
+
+    return Math.abs(deltaX) == Math.abs(deltaY);
   }
 
   /**
