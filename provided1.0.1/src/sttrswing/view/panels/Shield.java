@@ -105,7 +105,7 @@ public class Shield extends View {
 
         content.add(messagePanel);
 
-        add(content);
+        add(content, BorderLayout.CENTER);
 
         JPanel actions = new JPanel();
         actions.setOpaque(false);
@@ -132,7 +132,7 @@ public class Shield extends View {
         JButton cancel = buildButton("Cancel", e -> controller.setDefaultView(game));
         actions.add(apply);
         actions.add(cancel);
-        add(actions);
+        add(actions, BorderLayout.SOUTH);
 
         revalidate();
         repaint();
