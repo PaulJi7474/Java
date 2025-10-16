@@ -50,7 +50,6 @@ public class QuadrantScan extends View {
                 MapSquare sq = squares[y][x];
                 if (sq == null) {
                     sq = buildEmptyMapSquare();
-                    sq.setText(" ? ");
                 }
                 grid.add(sq);
             }

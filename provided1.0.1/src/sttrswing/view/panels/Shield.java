@@ -43,6 +43,7 @@ public class Shield extends View {
         this.slider = new Slider(maxTransfer);
         this.slider.setOpaque(false);
         this.slider.setSnapToTicks(true);
+        this.slider.setForeground(Color.WHITE);
 
         if (canTransferEnergy) {
             this.slider.setMinimum(1);
@@ -52,19 +53,27 @@ public class Shield extends View {
             final Hashtable<Integer, JComponent> labels = new Hashtable<>();
             final int spacing = Math.max(1, this.slider.getMajorTickSpacing());
             for (int value = maxTransfer; value >= 1; value -= spacing) {
-                labels.put(value, new JLabel(String.valueOf(value)));
+                JLabel label = new JLabel(String.valueOf(value));
+                label.setForeground(Color.WHITE);
+                labels.put(value, label);
             }
             if (!labels.containsKey(1)) {
-                labels.put(1, new JLabel("1"));
+                JLabel minLabel = new JLabel("1");
+                minLabel.setForeground(Color.WHITE);
+                labels.put(1, minLabel);
             }
             if (!labels.containsKey(maxTransfer)) {
-                labels.put(maxTransfer, new JLabel(String.valueOf(maxTransfer)));
+                JLabel maxLabel = new JLabel(String.valueOf(maxTransfer));
+                maxLabel.setForeground(Color.WHITE);
+                labels.put(maxTransfer, maxLabel);
             }
             this.slider.setLabelTable(labels);
         } else {
             this.slider.setEnabled(false);
             final Hashtable<Integer, JComponent> labels = new Hashtable<>();
-            labels.put(0, new JLabel("0"));
+            JLabel label = new JLabel("0");
+            label.setForeground(Color.WHITE);
+            labels.put(0, label);
             this.slider.setLabelTable(labels);
         }
 
@@ -82,10 +91,12 @@ public class Shield extends View {
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
 
         JLabel prompt = new JLabel(canTransferEnergy ? "Adjust Shields!" : "Insufficient Energy", SwingConstants.CENTER);
+        prompt.setForeground(Color.WHITE);
         prompt.setFont(prompt.getFont().deriveFont(Font.BOLD, prompt.getFont().getSize() + 2f));
         prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel selectedAmount = new JLabel(canTransferEnergy ? String.valueOf(this.slider.getValue()) : "0", SwingConstants.CENTER);
+        selectedAmount.setForeground(Color.WHITE);
         selectedAmount.setFont(selectedAmount.getFont().deriveFont(selectedAmount.getFont().getSize() + 6f));
         selectedAmount.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -93,6 +104,7 @@ public class Shield extends View {
                 ? String.format("Transfer between %d and %d (≤ 90%% of reserves)", this.slider.getMinimum(), maxTransfer)
                 : "No spare energy available",
                 SwingConstants.CENTER);
+        hint.setForeground(Color.WHITE);
         hint.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         messagePanel.add(Box.createVerticalGlue());
@@ -118,6 +130,7 @@ public class Shield extends View {
             controller.setDefaultView(game);
         });
         apply.setEnabled(canTransferEnergy);
+        apply.setForeground(Color.WHITE);
 
         this.slider.addChangeListener(e -> {
             int value = Math.max(this.slider.getMinimum(), this.slider.getValue());
@@ -130,6 +143,7 @@ public class Shield extends View {
         });
 
         JButton cancel = buildButton("Cancel", e -> controller.setDefaultView(game));
+        cancel.setForeground(Color.WHITE);
         actions.add(apply);
         actions.add(cancel);
         add(actions, BorderLayout.SOUTH);

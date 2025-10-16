@@ -178,37 +178,21 @@ public class Enterprise extends Entity implements Healable, HasFaction {
    *  <li>e : 999 or less energy reserves (note the e can be changed out for ë based on torpedo
    *  count)</li>
    * </ul>
-   * <h4>Shields:</h4>
-   * <ul>
-   *  <li>. . : indicates shields are at 0</li>
-   *  <li>- - : indicates shields are at 200 or less</li>
-   *  <li>\{ \} : indicates shields are at between 200 and 1001</li>
-   *  <li>( ) :  indicates shields are at 1001 or greater</li>
-   * </ul>
+
    * <h4>Torpedoes:</h4>
    *
-   * <p>If the {@link Enterprise} has any torpedoes switch out the E/e shown for the equivalent
-   * with a umlaut to signify that it has ammo.
-   * i.e E becomes Ë, e becomes ë</p>
+   * <p>The outer characters of the symbol remain constant so that changes to shield allocation do
+   * not alter the displayed icon.</p>
    *
    * @return a 3 char long {@link String} representation of the {@link Enterprise} with implicit
-   * indications for the state of shields, torpedo ammo and energy.
+   * indications for the state of torpedo ammo and energy.
    */
   @Override
   public String symbol() {
-    String left = ".";
+    String left = "{";
     String center = "E";
-    String right = ".";
-    if (this.shields.get() > 1000) {
-      left = "(";
-      right = ")";
-    } else if (this.shields.get() > 200) {
-      left = "{";
-      right = "}";
-    } else if (this.shields.get() > 0) {
-      left = "-";
-      right = "-";
-    }
+    String right = "}";
+
 
     //Central Symbol management
     if (this.energy.get() < 1000) {

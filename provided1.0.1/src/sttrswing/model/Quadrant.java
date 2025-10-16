@@ -375,11 +375,31 @@ public class Quadrant implements Hittable, HasPosition {
       return true;
     }
 
-    if (deltaX == 0 || deltaY == 0) {
-      return true;
+    boolean aligned = (deltaX == 0 || deltaY == 0 || Math.abs(deltaX) == Math.abs(deltaY));
+    if (!aligned) {
+      return false;
     }
 
-    return Math.abs(deltaX) == Math.abs(deltaY);
+    return !hasBlockingObstacle(klingon, enterprise);
+  }
+
+  private boolean hasBlockingObstacle(final Klingon klingon, final Enterprise enterprise) {
+    final int stepX = Integer.compare(enterprise.getX(), klingon.getX());
+    final int stepY = Integer.compare(enterprise.getY(), klingon.getY());
+
+    int x = klingon.getX() + stepX;
+    int y = klingon.getY() + stepY;
+
+    while (x != enterprise.getX() || y != enterprise.getY()) {
+      Entity entity = this.getEntityAt(x, y);
+      if (entity instanceof Star || entity instanceof Starbase) {
+        return true;
+      }
+      x += stepX;
+      y += stepY;
+    }
+
+    return false;
   }
 
   /**
