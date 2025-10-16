@@ -7,6 +7,8 @@ import sttrswing.view.guicomponents.Slider;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Objects;
 
 /**
@@ -34,31 +36,81 @@ public class Shield extends View {
 
         addLabel(new JLabel("Shields"));
 
-        // 仅供测试访问的 Slider 对象
-        this.slider = new Slider();
+        final int spareEnergy = Math.max(0, game.spareEnergy());
+        final int currentEnergy = Math.max(0, game.playerEnergy());
+        final int ninetyPercent = (int) Math.floor(currentEnergy * 0.9);
+        final int maxTransfer = Math.min(spareEnergy, ninetyPercent);
+        final boolean canTransferEnergy = maxTransfer >= 1;
 
-        // 真实可视滑动条（内部实现，不对外暴露）
-        final int maxSpend = Math.max(0, game.spareEnergy());
-        final JSlider spend = new JSlider(0, maxSpend, Math.min(100, maxSpend));
-        spend.setOpaque(false);
-        spend.setPaintTicks(true);
-        spend.setMajorTickSpacing(Math.max(1, maxSpend / 4 == 0 ? 1 : maxSpend / 4));
+        this.slider = new Slider(maxTransfer);
+        this.slider.setOpaque(false);
 
-        JPanel form = new JPanel(new BorderLayout(8, 8));
-        form.setOpaque(false);
-        form.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        form.add(new JLabel("Energy to spend on shields:"), BorderLayout.WEST);
-        form.add(spend, BorderLayout.CENTER);
-        add(form);
+        if (canTransferEnergy) {
+            this.slider.setMinimum(1);
+            this.slider.setValue(maxTransfer);
+            this.slider.setLabelTable(createLabelTable(this.slider, 1, maxTransfer));
+        } else {
+            this.slider.setEnabled(false);
+            this.slider.setLabelTable(createLabelTable(this.slider, 0, 0));
+        }
+
+        JPanel content = new JPanel(new GridLayout(1, 2, 12, 0));
+        content.setOpaque(false);
+        content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        JPanel sliderWrapper = new JPanel(new BorderLayout());
+        sliderWrapper.setOpaque(false);
+        sliderWrapper.add(this.slider, BorderLayout.CENTER);
+        content.add(sliderWrapper);
+
+        JPanel messagePanel = new JPanel();
+        messagePanel.setOpaque(false);
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+
+        JLabel prompt = new JLabel(canTransferEnergy ? "Adjust Shields!" : "Insufficient Energy", SwingConstants.CENTER);
+        prompt.setFont(prompt.getFont().deriveFont(Font.BOLD, prompt.getFont().getSize() + 2f));
+        prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel selectedAmount = new JLabel(canTransferEnergy ? String.valueOf(this.slider.getValue()) : "0", SwingConstants.CENTER);
+        selectedAmount.setFont(selectedAmount.getFont().deriveFont(selectedAmount.getFont().getSize() + 6f));
+        selectedAmount.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel hint = new JLabel(canTransferEnergy
+                ? String.format("Transfer up to %d (90%% of reserves)", maxTransfer)
+                : "No spare energy available",
+                SwingConstants.CENTER);
+        hint.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        messagePanel.add(Box.createVerticalGlue());
+        messagePanel.add(prompt);
+        messagePanel.add(Box.createVerticalStrut(12));
+        messagePanel.add(selectedAmount);
+        messagePanel.add(Box.createVerticalStrut(12));
+        messagePanel.add(hint);
+        messagePanel.add(Box.createVerticalGlue());
+
+        content.add(messagePanel);
+
+        add(content);
 
         JPanel actions = new JPanel();
         actions.setOpaque(false);
         JButton apply = buildButton("Apply", e -> {
-            int req = spend.getValue();
-            game.shields(req);
-            game.turn();
+            int req = this.slider.getValue();
+            if (req >= 1) {
+                game.shields(req);
+                game.turn();
+            }
             controller.setDefaultView(game);
         });
+        apply.setEnabled(canTransferEnergy);
+
+        this.slider.addChangeListener(e -> {
+            int value = this.slider.getValue();
+            selectedAmount.setText(String.valueOf(Math.max(0, value)));
+            apply.setEnabled(value >= 1);
+        });
+
         JButton cancel = buildButton("Cancel", e -> controller.setDefaultView(game));
         actions.add(apply);
         actions.add(cancel);
@@ -74,5 +126,27 @@ public class Shield extends View {
      */
     public Slider getSlider() {
         return this.slider;
+    }
+
+    private static Dictionary<Integer, JComponent> createLabelTable(final Slider slider, final int min, final int max) {
+        final Hashtable<Integer, JComponent> labels = new Hashtable<>();
+        final int spacing = Math.max(1, slider.getMajorTickSpacing());
+
+        if (max < min) {
+            labels.put(min, new JLabel(String.valueOf(min)));
+            return labels;
+        }
+
+        for (int value = max; value >= min; value -= spacing) {
+            labels.put(value, new JLabel(String.valueOf(value)));
+        }
+
+        if (!labels.containsKey(min)) {
+            labels.put(min, new JLabel(String.valueOf(min)));
+        }
+        if (!labels.containsKey(max)) {
+            labels.put(max, new JLabel(String.valueOf(max)));
+        }
+        return labels;
     }
 }

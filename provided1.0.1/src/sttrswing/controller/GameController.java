@@ -259,7 +259,15 @@ public class GameController extends JFrame {
   }
 
   public void setShieldsView(GameModel game) {
+    if (game.hasWon()) { setWinGameView(game); return; }
+    if (game.hasLost()) { setLoseGameView(game); return; }
+
     StandardLayoutView layout = new StandardLayoutView("Shields");
+    layout.addViewPanel(new QuadrantScan(game))
+        .addViewPanel(new EnterpriseStatus(game))
+        .addViewPanel(new Options(game, this))
+        .addViewPanel(new Shield(game, this));
+
     currentView = layout;
     setContentPane(layout);
     revalidate();
