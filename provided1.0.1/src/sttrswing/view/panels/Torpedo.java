@@ -17,8 +17,8 @@ import java.util.Objects;
  */
 public class Torpedo extends View {
 
-    // private final GameModel game;
-    // private final GameController controller;
+    private final GameModel game;
+    private final GameController controller;
 
     /**
      * Construct a new Torpedo instance.
@@ -27,10 +27,8 @@ public class Torpedo extends View {
      */
     public Torpedo(final GameModel game, final GameController controller) {
         super("Torpedoes");
-        // this.game = Objects.requireNonNull(game, "game must not be null");
-        Objects.requireNonNull(game, "game must not be null");
-        // this.controller = Objects.requireNonNull(controller, "controller must not be null");
-        Objects.requireNonNull(controller, "controller must not be null");
+        this.game = Objects.requireNonNull(game, "game must not be null");
+        this.controller = Objects.requireNonNull(controller, "controller must not be null");
 
         addLabel(new JLabel("Photon Torpedoes"));
 
@@ -42,9 +40,9 @@ public class Torpedo extends View {
         ActionListener fire = e -> {
             if (e.getSource() instanceof DirectionButton) {
                 int dir = ((DirectionButton) e.getSource()).getDirection();
-                game.fireTorpedo(dir);
-                game.turn();
-                controller.setDefaultView(game);
+                this.game.fireTorpedo(dir);
+                this.game.turn();
+                this.controller.setDefaultView(this.game);
             }
         };
 
