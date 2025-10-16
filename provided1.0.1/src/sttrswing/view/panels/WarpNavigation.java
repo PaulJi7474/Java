@@ -19,8 +19,6 @@ import java.util.Objects;
  */
 public class WarpNavigation extends View {
 
-    // private final GameModel game;
-    // private final GameController controller;
     private final Slider slider; // for testability: warp factor / distance slider
 
     /**
@@ -35,14 +33,14 @@ public class WarpNavigation extends View {
 
         addLabel(new JLabel("Warp Navigation"));
 
-        this.slider = new Slider();
+        int spareEnergy = Math.max(0, game.spareEnergy());
+        this.slider = new Slider(spareEnergy, Math.min(spareEnergy, 300));
 
-        // 真实可视滑块（内部使用）：以 spareEnergy 作为最大可移动距离的简单上限
-        final int max = Math.max(1, game.spareEnergy());
-        final JSlider distance = new JSlider(1, max, Math.min(3, max));
+        int sliderMax = Math.max(1, spareEnergy);
+        final JSlider distance = new JSlider(1, sliderMax, Math.min(3, sliderMax));
         distance.setOpaque(false);
         distance.setPaintTicks(true);
-        distance.setMajorTickSpacing(Math.max(1, max / 4 == 0 ? 1 : max / 4));
+        distance.setMajorTickSpacing(Math.max(1, sliderMax / 4));
 
         JPanel distPanel = new JPanel(new BorderLayout(8, 8));
         distPanel.setOpaque(false);
@@ -51,41 +49,72 @@ public class WarpNavigation extends View {
         distPanel.add(distance, BorderLayout.CENTER);
         add(distPanel);
 
-        // 方向按钮：3×3
         JPanel grid = new JPanel(new GridLayout(3, 3, 6, 6));
         grid.setOpaque(false);
         grid.setBorder(BorderFactory.createEmptyBorder(6, 8, 8, 8));
 
         ActionListener move = e -> {
-            if (e.getSource() instanceof DirectionButton) {
-                int dir = ((DirectionButton) e.getSource()).getDirection();
-                double dist = Math.max(1, distance.getValue());
-                game.moveWithinQuadrant(dir, dist);
-                game.turn();
-                controller.setDefaultView(game);
+            if (!(e.getSource() instanceof DirectionButton)) {
+                return;
             }
+
+            int maxSteps = Math.max(0, game.spareEnergy() / 100);
+            if (maxSteps <= 0) {
+                JOptionPane.showMessageDialog(WarpNavigation.this,
+                    "Not enough energy to move.",
+                    "Insufficient Energy",
+                    JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            JSpinner spinner = new JSpinner(new SpinnerNumberModel(Math.min(3, maxSteps), 1, maxSteps, 1));
+            JComponent editor = spinner.getEditor();
+            if (editor instanceof JSpinner.DefaultEditor defaultEditor) {
+                defaultEditor.getTextField().setColumns(4);
+            }
+
+            JPanel prompt = new JPanel(new BorderLayout(6, 6));
+            prompt.add(new JLabel("Enter warp distance (1-" + maxSteps + "):"), BorderLayout.NORTH);
+            prompt.add(spinner, BorderLayout.CENTER);
+
+            int option = JOptionPane.showConfirmDialog(WarpNavigation.this,
+                prompt,
+                "Warp Distance",
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.PLAIN_MESSAGE);
+
+            if (option != JOptionPane.OK_OPTION) {
+                return;
+            }
+
+            Object value = spinner.getValue();
+            int selected = value instanceof Number ? ((Number) value).intValue() : 0;
+            if (selected < 1 || selected > maxSteps) {
+                return;
+            }
+
+            int direction = ((DirectionButton) e.getSource()).getDirection();
+            game.moveWithinQuadrant(direction, selected);
+            game.turn();
+            controller.setDefaultView(game);
         };
 
-        grid.add(buildButton(4, move)); // ↖
-        grid.add(buildButton(3, move)); // ↑
-        grid.add(buildButton(2, move)); // ↗
+        grid.add(buildButton(4, move));
+        grid.add(buildButton(3, move));
+        grid.add(buildButton(2, move));
 
-        grid.add(buildButton(5, move)); // ←
-        grid.add(centerBadge());
-        grid.add(buildButton(1, move)); // →
+        grid.add(buildButton(5, move));
+        JLabel you = new JLabel("YOU", SwingConstants.CENTER);
+        you.setOpaque(false);
+        you.setForeground(Color.WHITE);
+        grid.add(you);
+        grid.add(buildButton(1, move));
 
-        grid.add(buildButton(6, move)); // ↙
-        grid.add(buildButton(7, move)); // ↓
-        grid.add(buildButton(8, move)); // ↘
+        grid.add(buildButton(6, move));
+        grid.add(buildButton(7, move));
+        grid.add(buildButton(8, move));
 
         add(grid);
-
-        revalidate();
-        repaint();
-        
-        if (getComponentCount() == 0) {
-            add(new javax.swing.JButton("Warp…"), java.awt.BorderLayout.CENTER);
-        }
 
     }
 
@@ -115,11 +144,4 @@ public class WarpNavigation extends View {
         return btn;
     }
 
-    // --- private ---
-    private JComponent centerBadge() {
-        JLabel you = new JLabel("YOU", SwingConstants.CENTER);
-        you.setOpaque(false);
-        you.setForeground(Color.WHITE);
-        return you;
-    }
 }

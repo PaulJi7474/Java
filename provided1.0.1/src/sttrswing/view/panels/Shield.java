@@ -7,7 +7,6 @@ import sttrswing.view.guicomponents.Slider;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Objects;
 
@@ -38,20 +37,35 @@ public class Shield extends View {
 
         final int spareEnergy = Math.max(0, game.spareEnergy());
         final int currentEnergy = Math.max(0, game.playerEnergy());
-        final int ninetyPercent = (int) Math.floor(currentEnergy * 0.9);
-        final int maxTransfer = Math.min(spareEnergy, ninetyPercent);
+        final int maxTransfer = Math.min(spareEnergy, (int) Math.floor(currentEnergy * 0.9));
         final boolean canTransferEnergy = maxTransfer >= 1;
 
         this.slider = new Slider(maxTransfer);
         this.slider.setOpaque(false);
+        this.slider.setSnapToTicks(true);
 
         if (canTransferEnergy) {
             this.slider.setMinimum(1);
+            this.slider.setMaximum(maxTransfer);
+            this.slider.setMinorTickSpacing(Math.max(1, this.slider.getMajorTickSpacing() / 5));
             this.slider.setValue(maxTransfer);
-            this.slider.setLabelTable(createLabelTable(this.slider, 1, maxTransfer));
+            final Hashtable<Integer, JComponent> labels = new Hashtable<>();
+            final int spacing = Math.max(1, this.slider.getMajorTickSpacing());
+            for (int value = maxTransfer; value >= 1; value -= spacing) {
+                labels.put(value, new JLabel(String.valueOf(value)));
+            }
+            if (!labels.containsKey(1)) {
+                labels.put(1, new JLabel("1"));
+            }
+            if (!labels.containsKey(maxTransfer)) {
+                labels.put(maxTransfer, new JLabel(String.valueOf(maxTransfer)));
+            }
+            this.slider.setLabelTable(labels);
         } else {
             this.slider.setEnabled(false);
-            this.slider.setLabelTable(createLabelTable(this.slider, 0, 0));
+            final Hashtable<Integer, JComponent> labels = new Hashtable<>();
+            labels.put(0, new JLabel("0"));
+            this.slider.setLabelTable(labels);
         }
 
         JPanel content = new JPanel(new GridLayout(1, 2, 12, 0));
@@ -76,7 +90,7 @@ public class Shield extends View {
         selectedAmount.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel hint = new JLabel(canTransferEnergy
-                ? String.format("Transfer up to %d (90%% of reserves)", maxTransfer)
+                ? String.format("Transfer between %d and %d (≤ 90%% of reserves)", this.slider.getMinimum(), maxTransfer)
                 : "No spare energy available",
                 SwingConstants.CENTER);
         hint.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -106,8 +120,12 @@ public class Shield extends View {
         apply.setEnabled(canTransferEnergy);
 
         this.slider.addChangeListener(e -> {
-            int value = this.slider.getValue();
-            selectedAmount.setText(String.valueOf(Math.max(0, value)));
+            int value = Math.max(this.slider.getMinimum(), this.slider.getValue());
+            if (value != this.slider.getValue()) {
+                this.slider.setValue(value);
+                return;
+            }
+            selectedAmount.setText(String.valueOf(value));
             apply.setEnabled(value >= 1);
         });
 
@@ -126,27 +144,5 @@ public class Shield extends View {
      */
     public Slider getSlider() {
         return this.slider;
-    }
-
-    private static Dictionary<Integer, JComponent> createLabelTable(final Slider slider, final int min, final int max) {
-        final Hashtable<Integer, JComponent> labels = new Hashtable<>();
-        final int spacing = Math.max(1, slider.getMajorTickSpacing());
-
-        if (max < min) {
-            labels.put(min, new JLabel(String.valueOf(min)));
-            return labels;
-        }
-
-        for (int value = max; value >= min; value -= spacing) {
-            labels.put(value, new JLabel(String.valueOf(value)));
-        }
-
-        if (!labels.containsKey(min)) {
-            labels.put(min, new JLabel(String.valueOf(min)));
-        }
-        if (!labels.containsKey(max)) {
-            labels.put(max, new JLabel(String.valueOf(max)));
-        }
-        return labels;
     }
 }
