@@ -13,8 +13,8 @@ import sttrswing.view.panels.NearbyQuadrantScan;
 import sttrswing.view.panels.WarpNavigation;
 import sttrswing.view.panels.QuadrantNavigation;
 import sttrswing.view.panels.PhaserAttack;
-// import sttrswing.view.panels.Shield;
-// import sttrswing.view.panels.Torpedo;
+import sttrswing.view.panels.Shield;
+import sttrswing.view.panels.Torpedo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -211,7 +211,15 @@ public class GameController extends JFrame {
   }
 
   public void setTorpedoView(GameModel game) {
+    if (game.hasWon()) { setWinGameView(game); return; }
+    if (game.hasLost()) { setLoseGameView(game); return; }
+
     StandardLayoutView layout = new StandardLayoutView("Torpedoes");
+    layout.addViewPanel(new QuadrantScan(game))
+        .addViewPanel(new EnterpriseStatus(game))
+        .addViewPanel(new Options(game, this))
+        .addViewPanel(new Torpedo(game, this));
+
     currentView = layout;
     setContentPane(layout);
     revalidate();
