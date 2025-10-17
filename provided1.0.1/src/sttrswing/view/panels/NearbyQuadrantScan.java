@@ -7,13 +7,6 @@ import sttrswing.model.interfaces.HasSymbol;
 import sttrswing.view.View;
 import sttrswing.view.guicomponents.MapSquare;
 
-import sttrswing.model.enums.Faction;
-import sttrswing.model.interfaces.GameModel;
-import sttrswing.model.interfaces.HasFaction;
-import sttrswing.model.interfaces.HasSymbol;
-import sttrswing.view.View;
-import sttrswing.view.guicomponents.MapSquare;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;

@@ -20,8 +20,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public class GameController extends JFrame {
-  private static final String DEFAULT_HEADER =
-      "WELCOME CAPTAIN   Click the Start button to start the game!";
+
   private final Dimension windowSize;
   private final GameModel game;
   private final JMenu fileMenu = new JMenu("File");
