@@ -45,7 +45,7 @@ public class LoseGameView extends View {
         "The Enterprise has been shattered, its remnants float "
             + "in the cold dark of space...\n\n\nKlingons Left:"
             + game.totalKlingonCount() + "\n" + "Starbases Remaining:"
-            + game.totalStarbaseCount());
+            + game.totalStarbaseCount()); 
     this.details.setFont(new Font("Arial", Font.BOLD, 24));
     this.add(this.loseText);
     this.add(this.details);

@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,6 +38,9 @@ public class GameLoader {
   /** Attempt to load the file at the given path, track if it succeeds. */
   public void load() {
     lines.clear();
+    success = false;
+    enterprise = null;
+    galaxy = null;
     try {
       Path p = Paths.get(path);
       if (!Files.exists(p)) {
@@ -44,8 +48,8 @@ public class GameLoader {
         return;
       }
       lines.addAll(Files.readAllLines(p, StandardCharsets.UTF_8));
-      enterprise = parseEnterpriseLine(enterpriseLine());
-      galaxy = parseGalaxyLines(galaxyLines());
+      enterprise = buildEnterprise();
+      galaxy = buildGalaxy();
       success = true;
     } catch (IOException e) {
       success = false;
@@ -80,71 +84,141 @@ public class GameLoader {
     return success;
   }
 
-  /** Returns the reconstructed Enterprise from the loaded file. */
-  public Enterprise enterprise() {
-    if (!success || enterprise == null) {
-      throw new IllegalStateException("Call load() successfully before requesting the enterprise.");
-    }
-    return enterprise;
-  }
-
-  /** Returns the reconstructed Galaxy from the loaded file. */
-  public Galaxy galaxy() {
-    if (!success || galaxy == null) {
-      throw new IllegalStateException("Call load() successfully before requesting the galaxy.");
-    }
-    return galaxy;
-  }
-
   /** Returns a string representation of the loaded file content. */
   @Override
   public String toString() {
     return String.join(System.lineSeparator(), lines);
   }
 
-  private Enterprise parseEnterpriseLine(String line) {
+  /** Construct a new Galaxy instance using the currently loaded data. */
+  public Galaxy buildGalaxy() {
+    ArrayList<String> galaxyLines = galaxyLines();
+    if (galaxyLines.isEmpty()) {
+      throw new IllegalArgumentException("Missing galaxy information in save file.");
+    }
+    ArrayList<Quadrant> quadrants = new ArrayList<>();
+    for (String line : galaxyLines) {
+      if (line == null || line.isBlank()) {
+        continue;
+      }
+      try {
+        int x = parseLineForX(line);
+        int y = parseLineForY(line);
+        HashMap<String, Integer> symbol = parseLineForQuadrantSymbol(line);
+        quadrants.add(
+            new Quadrant(
+                x,
+                y,
+                symbol.getOrDefault("starbases", 0),
+                symbol.getOrDefault("klingons", 0),
+                symbol.getOrDefault("stars", 0)));
+      } catch (IOException e) {
+        throw new IllegalArgumentException("Unable to parse galaxy line: " + line, e);
+      }
+    }
+    Galaxy result = new Galaxy(quadrants);
+    this.galaxy = result;
+    return result;
+  }
+
+  /** Construct a new Enterprise instance using the currently loaded data. */
+  public Enterprise buildEnterprise() {
+    String line = enterpriseLine();
     if (line == null || line.isBlank()) {
       throw new IllegalArgumentException("Missing enterprise information in save file.");
     }
     Matcher matcher = ENTERPRISE_PATTERN.matcher(line.trim());
-    if (!matcher.matches()) {
-      throw new IllegalArgumentException("Invalid enterprise line: " + line);
-    }
-    int x = Integer.parseInt(matcher.group(1));
-    int y = Integer.parseInt(matcher.group(2));
-    int energy = Integer.parseInt(matcher.group(3));
-    int shields = Integer.parseInt(matcher.group(4));
-    int torpedoes = Integer.parseInt(matcher.group(5));
-    return new Enterprise(x, y, energy, shields, torpedoes);
-  }
-
-  private Galaxy parseGalaxyLines(ArrayList<String> lines) {
-    if (lines.isEmpty()) {
-      throw new IllegalArgumentException("Missing galaxy information in save file.");
-    }
-    ArrayList<Quadrant> quadrants = new ArrayList<>();
-    for (String line : lines) {
-      if (line == null || line.isBlank()) {
-        continue;
-      }
-      Matcher matcher = QUADRANT_PATTERN.matcher(line.trim());
-      if (!matcher.matches()) {
-        throw new IllegalArgumentException("Invalid quadrant line: " + line);
-      }
+    if (matcher.matches()) {
       int x = Integer.parseInt(matcher.group(1));
       int y = Integer.parseInt(matcher.group(2));
-      String symbol = matcher.group(3);
-      if (symbol.length() != 3) {
-        throw new IllegalArgumentException("Unexpected quadrant symbol: " + symbol);
-      }
-      int stars = Character.digit(symbol.charAt(0), 10);
-      int starbases = Character.digit(symbol.charAt(1), 10);
-      int klingons = Character.digit(symbol.charAt(2), 10);
-      if (stars < 0 || starbases < 0 || klingons < 0) {
-        throw new IllegalArgumentException("Invalid counts in quadrant symbol: " + symbol);
-      }
-      quadrants.add(new Quadrant(x, y, starbases, klingons, stars));
+      int energy = Integer.parseInt(matcher.group(3));
+      int shields = Integer.parseInt(matcher.group(4));
+      int torpedoes = Integer.parseInt(matcher.group(5));
+      Enterprise result = new Enterprise(x, y, energy, shields, torpedoes);
+      this.enterprise = result;
+      return result;
     }
-    return new Galaxy(quadrants);
+    try {
+      int x = parseLineForX(line);
+      int y = parseLineForY(line);
+      int energy = parseLineForEnergy(line);
+      int shields = parseLineForShields(line);
+      int torpedoes = parseLineForTorpedoes(line);
+      Enterprise result = new Enterprise(x, y, energy, shields, torpedoes);
+      this.enterprise = result;
+      return result;
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Invalid enterprise line: " + line, e);
+    }
+  }
+
+  /** Extract an x coordinate from the given line. */
+  public int parseLineForX(String line) throws IOException {
+    return extractNumber(line, "x:");
+  }
+
+  /** Extract a y coordinate from the given line. */
+  public int parseLineForY(String line) throws IOException {
+    return extractNumber(line, "y:");
+  }
+
+  /** Extract shield value from the given line. */
+  public int parseLineForShields(String line) throws IOException {
+    return extractNumber(line, "s:");
+  }
+
+  /** Extract energy value from the given line. */
+  public int parseLineForEnergy(String line) throws IOException {
+    return extractNumber(line, "e:");
+  }
+
+  /** Extract torpedo value from the given line. */
+  public int parseLineForTorpedoes(String line) throws IOException {
+    return extractNumber(line, "t:");
+  }
+
+  /** Extract the quadrant symbol metadata from the given line. */
+  public HashMap<String, Integer> parseLineForQuadrantSymbol(String line) throws IOException {
+    if (line == null) {
+      throw new IOException("Unable to parse null line for quadrant symbol.");
+    }
+    Matcher matcher = QUADRANT_PATTERN.matcher(line.trim());
+    if (!matcher.matches()) {
+      throw new IOException("Line does not match quadrant pattern: " + line);
+    }
+    String symbol = matcher.group(3);
+    if (symbol.length() < 3) {
+      throw new IOException("Quadrant symbol must contain at least three digits: " + symbol);
+    }
+    int stars = Character.digit(symbol.charAt(0), 10);
+    int klingons = Character.digit(symbol.charAt(1), 10);
+    int starbases = Character.digit(symbol.charAt(2), 10);
+    if (stars < 0 || klingons < 0 || starbases < 0) {
+      throw new IOException("Quadrant symbol must contain numeric digits: " + symbol);
+    }
+    HashMap<String, Integer> result = new HashMap<>();
+    result.put("stars", stars);
+    result.put("klingons", klingons);
+    result.put("starbases", starbases);
+    return result;
+  }
+
+  private int extractNumber(String line, String token) throws IOException {
+    if (line == null) {
+      throw new IOException("Unable to parse null line for token " + token);
+    }
+    int index = line.indexOf(token);
+    if (index < 0) {
+      throw new IOException("Token '" + token + "' not present in line: " + line);
+    }
+    int start = index + token.length();
+    int end = start;
+    while (end < line.length() && Character.isDigit(line.charAt(end))) {
+      end++;
+    }
+    if (start == end) {
+      throw new IOException("No numeric value found for token '" + token + "' in line: " + line);
+    }
+    return Integer.parseInt(line.substring(start, end));
   }
 }
