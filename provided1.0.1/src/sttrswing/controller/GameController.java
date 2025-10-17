@@ -53,7 +53,7 @@ public class GameController extends JFrame {
  * 点击 Start 后由 StartView 回调到 setCurrentQuadrantScanView(game) 切到图2布局。
  */
   public void start(GameModel game) {
-    // 初次启动时，设置窗口基本属性和菜单
+    // Initial window & menu
     if (!isDisplayable()) {
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setSize(windowSize);
@@ -62,35 +62,73 @@ public class GameController extends JFrame {
 
       JMenuBar mb = new JMenuBar();
       fileMenu.removeAll();
+
+      // --- Save ---
       JMenuItem save = new JMenuItem("Save");
-      save.addActionListener(e ->
-          javax.swing.JOptionPane.showMessageDialog(this, "Save not implemented yet."));
+      save.addActionListener(e -> {
+        // Game.export() -> string; write to data/save.trek
+        GameSaver saver = new GameSaver(game.export(), "data/save.trek");
+        saver.save();
+        JOptionPane.showMessageDialog(
+            this,
+            saver.success() ? "Saved to data/save.trek" : "Save failed. Check write permission.",
+            "Save",
+            saver.success() ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE
+        );
+      });
+
+      // --- Load ---
       JMenuItem load = new JMenuItem("Load");
-      load.addActionListener(e ->
-          javax.swing.JOptionPane.showMessageDialog(this, "Load not implemented yet."));
+      load.addActionListener(e -> {
+        GameLoader loader = new GameLoader("data/save.trek");
+        loader.load();
+
+        if (!loader.success()) {
+          JOptionPane.showMessageDialog(
+              this,
+              "Load failed. Make sure data/save.trek exists.",
+              "Load",
+              JOptionPane.ERROR_MESSAGE
+          );
+          return;
+        }
+
+        // Show a quick summary for feedback
+        String ent = loader.enterpriseLine();
+        java.util.List<String> galaxy = loader.galaxyLines();
+        JOptionPane.showMessageDialog(
+            this,
+            "Loaded OK.\nEnterprise line: " + ent + "\nGalaxy lines: " + galaxy.size(),
+            "Load",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+        // Optional: jump to the main in-game layout after loading
+        setCurrentQuadrantScanView(game);
+
+      });
+
       fileMenu.add(save);
       fileMenu.add(load);
       mb.add(fileMenu);
       setJMenuBar(mb);
     }
 
-    // —— 图1：预开始布局 —— //
+    // —— Your original initial (pre-start) layout ——
     StartView startView = new StartView(game, this);
     StandardLayoutView layout = new StandardLayoutView("Star Trek");
-    layout.addViewPanel(startView);                   // 左上：Start
-    layout.addViewPanel(new EnterpriseStatus(game));  // 右上：Stat / Value
-    layout.addViewPanel(new QuadrantScan(game));      // 左下：Map
-    layout.addViewPanel(new Options(game, this));     // 右下：按钮
+    layout.addViewPanel(startView)
+          .addViewPanel(new EnterpriseStatus(game))
+          .addViewPanel(new QuadrantScan(game))
+          .addViewPanel(new Options(game, this));
 
-    // 显示
     currentView = layout;
     setContentPane(layout);
     revalidate();
     repaint();
-    if (!isVisible()) {
-      setVisible(true);
-    }
+    if (!isVisible()) setVisible(true);
   }
+
 
 
 

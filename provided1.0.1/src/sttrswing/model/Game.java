@@ -453,8 +453,8 @@ public class Game implements GameModel {
       nextSectorIsValid = attemptMoveInQuadrant(this.currentQuadrant, this.getEnterprise(), vector);
       if (nextSectorIsValid) {
       // 成功移动 1 个 sector
-        if (this.hasSpareEnergy(100)) {
-          this.getEnterprise().drainEnergy(100); // 每步 1 能量
+        if (this.hasSpareEnergy(50)) {
+          this.getEnterprise().drainEnergy(50); // 每步 50 能量
         } else {
           break; // 没能量了，停止进一步移动
         }
