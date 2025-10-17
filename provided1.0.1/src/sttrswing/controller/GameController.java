@@ -86,25 +86,35 @@ public class GameController extends JFrame {
         if (!loader.success()) {
           JOptionPane.showMessageDialog(
               this,
-              "Load failed. Make sure data/save.trek exists.",
+              "Load failed. Make sure data/save.trek exists and is valid.",
               "Load",
               JOptionPane.ERROR_MESSAGE
           );
           return;
         }
 
-        // Show a quick summary for feedback
+        try {
+          game.load(loader.enterprise(), loader.galaxy());
+        } catch (IllegalStateException ex) {
+          JOptionPane.showMessageDialog(
+              this,
+              "Load failed. The save file could not be parsed.",
+              "Load",
+              JOptionPane.ERROR_MESSAGE
+          );
+          return;
+        }
+
+        setCurrentQuadrantScanView(game);
+
         String ent = loader.enterpriseLine();
         java.util.List<String> galaxy = loader.galaxyLines();
         JOptionPane.showMessageDialog(
             this,
-            "Loaded OK.\nEnterprise line: " + ent + "\nGalaxy lines: " + galaxy.size(),
+            "Loaded OK from data/save.trek.\n" + ent + "\nGalaxy lines loaded: " + galaxy.size(),
             "Load",
             JOptionPane.INFORMATION_MESSAGE
         );
-
-        // Optional: jump to the main in-game layout after loading
-        setCurrentQuadrantScanView(game);
 
       });
 
