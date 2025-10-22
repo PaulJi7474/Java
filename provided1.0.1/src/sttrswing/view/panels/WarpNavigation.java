@@ -34,7 +34,7 @@ public class WarpNavigation extends View {
         addLabel(new JLabel("Warp Navigation"));
 
         int spareEnergy = Math.max(0, game.spareEnergy());
-        this.slider = new Slider(spareEnergy, Math.min(spareEnergy, 300));
+        this.slider = new Slider(spareEnergy, JSlider.VERTICAL);
 
         int sliderMax = Math.max(1, spareEnergy);
         final JSlider distance = new JSlider(1, sliderMax, Math.min(3, sliderMax));
@@ -67,7 +67,10 @@ public class WarpNavigation extends View {
                 return;
             }
 
-            JSpinner spinner = new JSpinner(new SpinnerNumberModel(Math.min(3, maxSteps), 1, maxSteps, 1));
+            JSpinner spinner = new JSpinner(
+                new SpinnerNumberModel(Math.min(3, maxSteps), 1, maxSteps, 1)
+            );
+            
             JComponent editor = spinner.getEditor();
             if (editor instanceof JSpinner.DefaultEditor defaultEditor) {
                 defaultEditor.getTextField().setColumns(4);
@@ -119,7 +122,8 @@ public class WarpNavigation extends View {
     }
 
     /**
-     * Exists for testability reasons to allow us to confirm the Slider matches some expected constraints.
+     * Exists for testability reasons to allow us to 
+     * confirm the Slider matches some expected constraints.
      * @return the Slider used for warp factor/distance control.
      */
     public Slider getSlider() {

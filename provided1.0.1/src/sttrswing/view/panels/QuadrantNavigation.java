@@ -12,7 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.Objects;
 
 /**
- * QuadrantNavigation: 选择方向与距离，进行跨象限移动。
+ * QuadrantNavigation: choose direction and distance to move between quadrants.
  * Public API strictly per spec:
  *  - public QuadrantNavigation(GameModel game, GameController controller)
  *  - public DirectionButton buildButton(int direction, ActionListener listener)
@@ -36,7 +36,7 @@ public class QuadrantNavigation extends View {
         Objects.requireNonNull(game, "game must not be null");
         Objects.requireNonNull(controller, "controller must not be null");
 
-        // 标题
+        // title
         addLabel(new JLabel("Navigate Between Quadrants"));
 
 
@@ -44,12 +44,12 @@ public class QuadrantNavigation extends View {
 
         final double defaultDistance = 1.0;
 
-        // 方向按钮：3×3 格布局（中心占位）
+        // direction buttons: 3x3 grid layout (center occupied)
         JPanel grid = new JPanel(new GridLayout(3, 3, 6, 6));
         grid.setOpaque(false);
         grid.setBorder(BorderFactory.createEmptyBorder(6, 8, 8, 8));
 
-        // 构造监听器工厂：读取当前距离，移动、推进一回合并返回默认视图
+        // Construct listener factory: read current distance, move, advance turn and return default view
         ActionListener move = e -> {
             if (e.getSource() instanceof DirectionButton) {
                 DirectionButton btn = (DirectionButton) e.getSource();
@@ -61,13 +61,13 @@ public class QuadrantNavigation extends View {
             }
         };
 
-        // 方向映射与填充：1→, 2↗, 3↑, 4↖, 5←, 6↙, 7↓, 8↘
+        // direction buttons
         grid.add(buildButton(4, move)); // ↖
         grid.add(buildButton(3, move)); // ↑
         grid.add(buildButton(2, move)); // ↗
 
         grid.add(buildButton(5, move)); // ←
-        grid.add(centerBadge());        // 中心占位“YOU”
+        grid.add(centerBadge());        // center badge "YOU"
         grid.add(buildButton(1, move)); // →
 
         grid.add(buildButton(6, move)); // ↙
@@ -87,8 +87,8 @@ public class QuadrantNavigation extends View {
     }
 
     /**
-     * Builds a DirectionButton for the given direction (标注其会消耗一回合) 并绑定监听器；
-     * 同时跟踪按钮与监听器以便父类 View.cleanup() 清理。
+     * Builds a DirectionButton for the given direction and binds the given listener;
+     * also tracks the button and listener for cleanup by the parent View.
      *
      * @param direction direction we want the new direction button to represent (1..8)
      * @param listener  listener that triggers a turn, movement, and screen transition

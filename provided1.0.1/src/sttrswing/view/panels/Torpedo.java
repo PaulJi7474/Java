@@ -17,8 +17,8 @@ import java.util.Objects;
  */
 public class Torpedo extends View {
 
-    private final GameModel game;
-    private final GameController controller;
+    private final GameModel game; // game state
+    private final GameController controller; // controller for navigation/actions
 
     /**
      * Construct a new Torpedo instance.

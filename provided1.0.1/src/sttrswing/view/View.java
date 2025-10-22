@@ -10,73 +10,136 @@ import java.util.ArrayList;
  * label/button/listener tracking, and cleanup.
  */
 public class View extends JPanel {
-  private String title;
-  private JLabel lastLabel; // the last label added
-  private final ArrayList<ActionListener> listeners = new ArrayList<>();
-  private final ArrayList<JButton> buttons = new ArrayList<>();
+    private String title;                      // title of this View
+    private JLabel lastLabel;                  // the last label added
+    private final ArrayList<ActionListener> listeners = new ArrayList<>(); // tracked listeners
+    private final ArrayList<JButton> buttons = new ArrayList<>();          // tracked buttons
 
-  public View(String title) {
-    this.title = (title == null ? "" : title);
-    setBackground(Pallete.BLACK.color());   // 按要求：黑色背景（来自 Pallete）
-    setLayout(new BorderLayout());          // 方便子类直接 add 到不同区域
-  }
-
-  // ---- Title APIs ----
-  public String getTitle() { return title; }
-  public void setTitle(String title) { this.title = (title == null ? "" : title); }
-
-  // ---- Label APIs ----
-  public JLabel getLabel() { return lastLabel; }
-
-  /** 调整样式并加入到当前 View，同时记录为“lastLabel” */
-  public void addLabel(JLabel label) {
-    if (label == null) return;
-    // 统一样式：白色字、稍大字号、不遮底
-    label.setForeground(Pallete.WHITE.color());
-    label.setFont(label.getFont().deriveFont(Font.BOLD, 16f));
-    label.setOpaque(false);
-    this.lastLabel = label;
-    add(label, BorderLayout.NORTH); // 默认放顶部；子类可自行重排
-    revalidate();
-    repaint();
-  }
-
-  // ---- Tracking APIs ----
-  public void trackListener(ActionListener action) {
-    if (action != null) listeners.add(action);
-  }
-
-  public void trackButton(JButton button) {
-    if (button != null) buttons.add(button);
-  }
-
-  public ArrayList<ActionListener> getListeners() {
-    return new ArrayList<>(listeners);
-  }
-
-  public ArrayList<JButton> getButtons() {
-    return new ArrayList<>(buttons);
-  }
-
-  /** 统一建按钮并完成追踪 */
-  public JButton buildButton(String label, ActionListener listener) {
-    JButton btn = new JButton(label);
-    if (listener != null) {
-      btn.addActionListener(listener);
-      trackListener(listener);
+    /**
+     * Constructs a {@code View} with the given title, a black background, and a {@link BorderLayout}.
+     *
+     * @param title the title associated with this view; if {@code null}, it is treated as an empty string
+     */
+    public View(String title) {
+        this.title = (title == null ? "" : title);
+        setBackground(Pallete.BLACK.color());
+        setLayout(new BorderLayout());
     }
-    trackButton(btn);
-    return btn;
-  }
 
-  /** 清理：移除已追踪的监听器，防止内存泄漏/重复触发 */
-  public void cleanup() {
-    for (JButton b : buttons) {
-      for (ActionListener l : listeners) {
-        b.removeActionListener(l);
-      }
+    /**
+     * Returns the title of this view.
+     *
+     * @return the current title (never {@code null})
+     */
+    public String getTitle() {
+        return title;
     }
-    listeners.clear();
-    buttons.clear();
-  }
+
+    /**
+     * Sets the title of this view.
+     *
+     * @param title the new title; if {@code null}, an empty string is stored
+     */
+    public void setTitle(String title) {
+        this.title = (title == null ? "" : title);
+    }
+
+    /**
+     * Returns the most recently added {@link JLabel} via {@link #addLabel(JLabel)}.
+     *
+     * @return the last label added, or {@code null} if none has been added
+     */
+    public JLabel getLabel() {
+        return lastLabel;
+    }
+
+    /**
+     * Styles the given label (white, bold, 16pt, non-opaque), adds it to the top of this view,
+     * records it as the "last label", and triggers layout/paint updates.
+     *
+     * @param label the label to add; if {@code null}, this method is a no-op
+     */
+    public void addLabel(JLabel label) {
+        if (label == null) return;
+        label.setForeground(Pallete.WHITE.color());
+        label.setFont(label.getFont().deriveFont(Font.BOLD, 16f));
+        label.setOpaque(false);
+        this.lastLabel = label;
+        add(label, BorderLayout.NORTH);
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Tracks an {@link ActionListener} for later cleanup.
+     *
+     * @param action the listener to track; ignored if {@code null}
+     */
+    public void trackListener(ActionListener action) {
+        if (action != null) {
+            listeners.add(action);
+        }
+    }
+
+    /**
+     * Tracks a {@link JButton} for later cleanup.
+     *
+     * @param button the button to track; ignored if {@code null}
+     */
+    public void trackButton(JButton button) {
+        if (button != null) {
+            buttons.add(button);
+        }
+    }
+
+    /**
+     * Returns a snapshot of all tracked {@link ActionListener}s.
+     *
+     * @return a new list containing the currently tracked listeners
+     */
+    public ArrayList<ActionListener> getListeners() {
+        return new ArrayList<>(listeners);
+    }
+
+    /**
+     * Returns a snapshot of all tracked {@link JButton}s.
+     *
+     * @return a new list containing the currently tracked buttons
+     */
+    public ArrayList<JButton> getButtons() {
+        return new ArrayList<>(buttons);
+    }
+
+    /**
+     * Builds a {@link JButton} with the given label, optionally attaches the provided listener,
+     * and tracks both the button and the listener for later cleanup.
+     *
+     * @param label    the text to display on the button
+     * @param listener the listener to attach; may be {@code null}
+     * @return the newly created and tracked button
+     */
+    public JButton buildButton(String label, ActionListener listener) {
+        JButton btn = new JButton(label);
+        if (listener != null) {
+            btn.addActionListener(listener);
+            trackListener(listener);
+        }
+        trackButton(btn);
+        return btn;
+    }
+
+    /**
+     * Removes all tracked listeners from all tracked buttons, then clears the internal
+     * tracking collections. Call this when the view is being disposed or replaced to
+     * prevent memory leaks and duplicate event delivery.
+     */
+    public void cleanup() {
+        for (JButton b : buttons) {
+            for (ActionListener l : listeners) {
+                b.removeActionListener(l);
+            }
+        }
+        listeners.clear();
+        buttons.clear();
+    }
 }

@@ -90,18 +90,30 @@ public class Shield extends View {
         messagePanel.setOpaque(false);
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
 
-        JLabel prompt = new JLabel(canTransferEnergy ? "Adjust Shields!" : "Insufficient Energy", SwingConstants.CENTER);
+        JLabel prompt = new JLabel(
+            canTransferEnergy ? "Adjust Shields!" : "Insufficient Energy", 
+            SwingConstants.CENTER
+        );
         prompt.setForeground(Color.WHITE);
         prompt.setFont(prompt.getFont().deriveFont(Font.BOLD, prompt.getFont().getSize() + 2f));
         prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel selectedAmount = new JLabel(canTransferEnergy ? String.valueOf(this.slider.getValue()) : "0", SwingConstants.CENTER);
+        JLabel selectedAmount = new JLabel(
+            canTransferEnergy ? String.valueOf(this.slider.getValue()) : "0", 
+            SwingConstants.CENTER
+        );
         selectedAmount.setForeground(Color.WHITE);
-        selectedAmount.setFont(selectedAmount.getFont().deriveFont(selectedAmount.getFont().getSize() + 6f));
+        selectedAmount.setFont(
+            selectedAmount.getFont().deriveFont(
+                selectedAmount.getFont().getSize() + 6f
+            )
+        );
         selectedAmount.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel hint = new JLabel(canTransferEnergy
-                ? String.format("Transfer between %d and %d (≤ 90%% of reserves)", this.slider.getMinimum(), maxTransfer)
+                ? String.format("Transfer between %d and %d (≤ 90%% of reserves)", 
+                    this.slider.getMinimum(), maxTransfer
+                )
                 : "No spare energy available",
                 SwingConstants.CENTER);
         hint.setForeground(Color.WHITE);

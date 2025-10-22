@@ -13,14 +13,15 @@ import java.util.HashMap;
 import java.util.Objects;
 
 /**
- * NearbyQuadrantScan: shows scan results (e.g. "201") of the 8 quadrants surrounding the player's current quadrant.
+ * NearbyQuadrantScan: shows scan results (e.g. "201") of the 
+ * 8 quadrants surrounding the player's current quadrant.
  * API strictly follows the spec:
  *  - public NearbyQuadrantScan(GameModel game)
  *  - public MapSquare buildMapSquare(String label)
  */
 public class NearbyQuadrantScan extends View {
 
-    private final GameModel game;
+    private final GameModel game; // game state we use to construct this view for both information and method calls
 
     /**
      * Construct a new NearbyQuadrantScan instance.

@@ -18,8 +18,8 @@ import java.util.Objects;
  */
 public class EnterpriseStatus extends View {
 
-    private final GameModel game;
-    private final JTable table;
+    private final GameModel game; // game state we use to construct this view for both information and method calls
+    private final JTable table; // JTable showing the enterprise status
 
     /**
      * Constructs a new EnterpriseStatus view.
@@ -66,11 +66,16 @@ public class EnterpriseStatus extends View {
         table.getTableHeader().setReorderingAllowed(false);
         table.getTableHeader().setBackground(Pallete.BLACK.color());
         table.getTableHeader().setForeground(Pallete.WHITE.color());
-        table.getTableHeader().setFont(table.getTableHeader().getFont().deriveFont(Font.BOLD, 14f));
+        table.getTableHeader().setFont(table.getTableHeader().
+            getFont().deriveFont(Font.BOLD, 14f));
 
         JScrollPane scroller = new JScrollPane(table);
-        scroller.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        scroller.getViewport().setBackground(Pallete.BLACK.color());
+        scroller.setBorder(
+            BorderFactory.createEmptyBorder(8, 8, 8, 8)
+        );
+        scroller.getViewport().setBackground(
+            Pallete.BLACK.color()
+        );
         scroller.setOpaque(false);
         scroller.getViewport().setOpaque(true);
         add(scroller, BorderLayout.CENTER);
@@ -85,7 +90,8 @@ public class EnterpriseStatus extends View {
     }
 
     /**
-     * Public for Testability reasons, lets us access the JTable, so we ensure it has instantiated as expected.
+     * Public for Testability reasons, lets us access the JTable, 
+     * so we ensure it has instantiated as expected.
      * @return the JTable
      */
     public JTable getTable() {
