@@ -174,6 +174,9 @@ public class Enterprise extends Entity implements Healable, HasFaction {
      */
     public void gainEnergy(final int energy) {
         this.energy.adjust(energy);
+        if(energy >0 ) {
+            this.torpedoes.adjust(1);
+        }
     }
 
     /**
