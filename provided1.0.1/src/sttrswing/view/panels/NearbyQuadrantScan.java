@@ -21,7 +21,8 @@ import java.util.Objects;
  */
 public class NearbyQuadrantScan extends View {
 
-    private final GameModel game; // game state we use to construct this view for both information and method calls
+    private final GameModel game; 
+    // game state we use to construct this view for both information and method calls
 
     /**
      * Construct a new NearbyQuadrantScan instance.

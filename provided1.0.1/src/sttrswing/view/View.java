@@ -60,7 +60,9 @@ public class View extends JPanel {
      * @param label the label to add; if {@code null}, this method is a no-op
      */
     public void addLabel(JLabel label) {
-        if (label == null) return;
+        if (label == null) {
+            return;
+        }
         label.setForeground(Pallete.WHITE.color());
         label.setFont(label.getFont().deriveFont(Font.BOLD, 16f));
         label.setOpaque(false);

@@ -1,4 +1,3 @@
-// src/sttrswing/view/panels/Options.java
 package sttrswing.view.panels;
 
 import sttrswing.controller.GameController;
@@ -45,7 +44,9 @@ public class Options extends View {
      */
     public void buildOptionButtons(GameModel game, GameController controller) {
         // 1) Quadrant Navigation
-        this.add(buildButton("Quadrant Navigation", e -> controller.setQuadrantNavigationView(game)));
+        this.add(buildButton("Quadrant Navigation", 
+            e -> controller.setQuadrantNavigationView(game)
+        ));
 
         // 2) Warp Navigation
         this.add(buildButton("Warp Navigation", e -> controller.setWarpNavigationView(game)));

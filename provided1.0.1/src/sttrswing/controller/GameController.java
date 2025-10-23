@@ -80,7 +80,7 @@ public class GameController extends JFrame {
             setLocationRelativeTo(null);
             setTitle("Star Trek");
 
-            JMenuBar mb = new JMenuBar();
+            
             fileMenu.removeAll();
 
             // Save
@@ -132,6 +132,8 @@ public class GameController extends JFrame {
                         JOptionPane.INFORMATION_MESSAGE);
 
             });
+
+            JMenuBar mb = new JMenuBar();
 
             fileMenu.add(save);
             fileMenu.add(load);

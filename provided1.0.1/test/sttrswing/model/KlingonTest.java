@@ -20,8 +20,8 @@ public class KlingonTest {
 
   @Test
   public void faction_is_neutral_until_scanned_then_klingon() {
-    assertEquals(Faction.NEUTRAL, k.faction()); // 未识别前
-    k.scan();                                   // 识别后
+    assertEquals(Faction.NEUTRAL, k.faction()); 
+    k.scan();                                   
     assertEquals(Faction.KLINGON, k.faction());
   }
 
@@ -29,7 +29,7 @@ public class KlingonTest {
   public void symbol_masking_and_scan() {
     assertEquals(" ? ", k.symbol());
     k.scan();
-    assertEquals("+K+", k.symbol()); // Klingon.symbol() 的可视符号；若不同请改为你的实现
+    assertEquals("+K+", k.symbol());
   }
 
   @Test
@@ -40,17 +40,15 @@ public class KlingonTest {
 
     int dmg = k.attack(ent);
     assertTrue(dmg >= 0);
-    // 攻击应降低护盾或能量
     assertTrue(ent.shields() < s0 || ent.energy() < e0);
   }
 
   @Test
   public void hit_reduces_energy_and_marks_for_removal_at_zero() {
-    k.hit(100);
-    // 没有直接 getter 暴露能量值，但被打不应标记删除
+    k.hit(40);
     assertFalse(k.isMarkedForRemoval());
 
-    k.hit(10000); // 过量伤害
+    k.hit(10000);
     assertTrue(k.isMarkedForRemoval());
   }
 }

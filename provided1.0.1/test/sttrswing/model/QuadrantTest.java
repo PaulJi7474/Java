@@ -12,14 +12,12 @@ import sttrswing.model.Entity;
 
 import sttrswing.model.Starbase;
 
-import sttrswing.model.Enterprise;
 
 public class QuadrantTest {
   private Quadrant q;
 
   @Before
   public void setUp() {
-    // 使用你类中提供的“确定数量”的构造：Quadrant(galaxyX, galaxyY, starbases, klingons, stars)
     q = new Quadrant(2, 3, /*starbases*/2, /*klingons*/3, /*stars*/4);
   }
 
@@ -51,7 +49,6 @@ public class QuadrantTest {
 
   @Test
   public void getSymbolAt_matches_entity_symbol_after_scan() {
-    // 取一个已知存在的实体（例如第一座星基地），扫描后检查符号
     Starbase base = q.starbases().get(0);
     base.scan();
     String s = q.getSymbolAt(base.getX(), base.getY());
@@ -63,7 +60,6 @@ public class QuadrantTest {
     int k0 = q.klingonCount();
     int b0 = q.starbaseCount();
 
-    // 标记一个克林贡与一个星基地删除
     q.klingons().get(0).remove();
     q.starbases().get(0).remove();
 

@@ -49,7 +49,11 @@ public class QuadrantNavigation extends View {
         grid.setOpaque(false);
         grid.setBorder(BorderFactory.createEmptyBorder(6, 8, 8, 8));
 
-        // Construct listener factory: read current distance, move, advance turn and return default view
+        /**
+         * Construct listener factory: 
+         * read current distance, move, advance turn and return default view
+         */
+
         ActionListener move = e -> {
             if (e.getSource() instanceof DirectionButton) {
                 DirectionButton btn = (DirectionButton) e.getSource();

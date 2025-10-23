@@ -31,6 +31,7 @@ public class StandardLayoutView extends View {
      * {@link #revalidate()} and {@link #repaint()} and returns {@code this} for chaining.
      *
      * @param view View to add as a panel; a {@code StandardLayoutView} can have up to 4 panels added
+     *  a {@code StandardLayoutView} can have up to 4 panels added
      * @return a reference to this instance so you can chain these method calls together,
      *         e.g. {@code example.addViewPanel(a).addViewPanel(b);}
      * @throws RuntimeException if a View beyond the max panel count is added
@@ -47,10 +48,10 @@ public class StandardLayoutView extends View {
     }
 
     /**
-     * Here purely for testability reasons.
-     *
-     * @return a new list containing all {@link View}s that were added to this {@code StandardLayoutView}
-     */
+    * Here purely for testability reasons.
+    *
+    * @return a new list containing all {@link View}s that were added to this {@code StandardLayoutView}
+    */
     public ArrayList<View> getViewPanels() {
         return new ArrayList<>(panels);
     }

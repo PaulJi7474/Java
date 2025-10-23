@@ -66,8 +66,8 @@ public class EnterpriseStatus extends View {
         table.getTableHeader().setReorderingAllowed(false);
         table.getTableHeader().setBackground(Pallete.BLACK.color());
         table.getTableHeader().setForeground(Pallete.WHITE.color());
-        table.getTableHeader().setFont(table.getTableHeader().
-            getFont().deriveFont(Font.BOLD, 14f));
+        table.getTableHeader().setFont(table.getTableHeader()
+            .getFont().deriveFont(Font.BOLD, 14f));
 
         JScrollPane scroller = new JScrollPane(table);
         scroller.setBorder(

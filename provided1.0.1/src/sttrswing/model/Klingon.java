@@ -10,7 +10,7 @@ import sttrswing.model.interfaces.Hittable;
  */
 public class Klingon extends Entity implements Hittable, HasFaction {
 
-  private final int maxEnergy = 300;
+  private final int maxEnergy = 80;
   private final Stat energy = new Stat(maxEnergy, maxEnergy);
   private Faction faction = Faction.NEUTRAL;
   //until identified the klingon is detected as neutral

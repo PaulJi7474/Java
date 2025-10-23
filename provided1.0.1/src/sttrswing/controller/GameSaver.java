@@ -11,6 +11,8 @@ import java.nio.file.StandardOpenOption;
 /**
  * Saves the stringified game state to a target file.
  * Javadoc: GameSaver(String gameData, String path), save(), success()
+ * @param gameData the game data to save
+ * @param path     the file path to save the game data to
  */
 public class GameSaver {
     private final String gameData; // stringified game data to save
@@ -25,9 +27,6 @@ public class GameSaver {
     /**
      * Run the saving code, attempt to write to the file location with our
      * stringified game data.
-     * 
-     * @param gameData the game data to save
-     * @param path     the file path to save the game data to
      */
     public void save() {
         try {
